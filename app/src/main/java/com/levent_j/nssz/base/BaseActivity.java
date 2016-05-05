@@ -13,7 +13,7 @@ import butterknife.ButterKnife;
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
-    private String TAG;
+    public String TAG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
