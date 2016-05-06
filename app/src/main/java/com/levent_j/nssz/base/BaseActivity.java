@@ -4,6 +4,7 @@ package com.levent_j.nssz.base;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.Toast;
 
 import butterknife.ButterKnife;
@@ -23,6 +24,7 @@ public abstract class BaseActivity extends AppCompatActivity {
         init();
         setListener();
         TAG = this.getClass().getSimpleName();
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
 
     protected abstract int getLayoutId();

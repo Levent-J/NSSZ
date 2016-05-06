@@ -3,6 +3,8 @@ package com.levent_j.nssz.activity;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -12,8 +14,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.levent_j.nssz.Entry.Device;
 import com.levent_j.nssz.R;
+import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseActivity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 
@@ -27,6 +34,11 @@ public class MainActivity extends BaseActivity
     DrawerLayout drawer;
     @Bind(R.id.nav_view)
     NavigationView navigationView;
+    @Bind(R.id.rv_devices)
+    RecyclerView recyclerView;
+
+    private DeviceAdapter deviceAdapter;
+    private List<Device> deviceList;
 
     @Override
     protected int getLayoutId() {
@@ -41,7 +53,29 @@ public class MainActivity extends BaseActivity
         drawer.setDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
+        deviceAdapter = new DeviceAdapter(this);
+        deviceList = new ArrayList<>();
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setAdapter(deviceAdapter);
+        loadBtBata();
+    }
 
+    private void loadBtBata() {
+        //TODO:从蓝牙获取数据
+        deviceList.clear();
+        for (int i=0;i<10;i++){
+            Device device = new Device();
+            device.setName("XX"+i);
+            device.setV(i);
+            device.setI(i);
+            device.setT(i);
+            device.setW(i);
+            device.setMove(true);
+            deviceList.add(device);
+        }
+        deviceAdapter.updateDeviceList(deviceList);
+        recyclerView.setAdapter(deviceAdapter);
     }
 
     @Override
@@ -102,5 +136,6 @@ public class MainActivity extends BaseActivity
     public void onClick(View v) {
         Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
                 .setAction("Action", null).show();
+        loadBtBata();
     }
 }
