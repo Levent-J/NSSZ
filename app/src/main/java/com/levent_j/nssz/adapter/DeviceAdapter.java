@@ -39,11 +39,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     @Override
     public void onBindViewHolder(mViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        holder.Dname.setText(""+device.getName());
-        holder.Dv.setText(""+device.getV());
-        holder.Di.setText(""+device.getI());
-        holder.Dt.setText(""+device.getT());
-        holder.Dw.setText(""+device.getW());
+        holder.Dname.setText("设备名："+device.getName());
+        holder.Dv.setText("电压"+device.getV());
+        holder.Di.setText("电流"+device.getI());
+        holder.Dt.setText("温度"+device.getT());
+        holder.Dw.setText("湿度"+device.getW());
         holder.Dmove.setText(device.isMove()?"移动":"未移动");
     }
 

@@ -18,6 +18,7 @@ import com.levent_j.nssz.Entry.Device;
 import com.levent_j.nssz.R;
 import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseActivity;
+import com.levent_j.nssz.utils.SpaceItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,6 +58,8 @@ public class MainActivity extends BaseActivity
         deviceList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
+        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.space);
+        recyclerView.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
         recyclerView.setAdapter(deviceAdapter);
         loadBtBata();
     }
