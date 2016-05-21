@@ -1,10 +1,13 @@
 package com.levent_j.nssz.activity;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -22,6 +25,8 @@ import com.levent_j.nssz.utils.SpaceItemDecoration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.Bind;
 
@@ -40,6 +45,15 @@ public class MainActivity extends BaseActivity
 
     private DeviceAdapter deviceAdapter;
     private List<Device> deviceList;
+
+    private Timer timer;
+    private TimerTask timerTask;
+    private Handler handler;
+
+    private boolean isChecking = false;
+
+    public MainActivity() {
+    }
 
     @Override
     protected int getLayoutId() {
@@ -61,7 +75,38 @@ public class MainActivity extends BaseActivity
         int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.space);
         recyclerView.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
         recyclerView.setAdapter(deviceAdapter);
+
+        timer = new Timer();
         loadBtBata();
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                checkDevices();
+                super.handleMessage(msg);
+            }
+        };
+        initTask();
+    }
+
+    private void initTask() {
+        timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                Message message = new Message();
+                message.what = 1;
+                handler.sendMessage(message);
+            }
+        };
+    }
+    private void initTimer() {
+        timer = new Timer();
+    }
+
+    private void checkDevices() {
+        for (Device device:deviceList){
+            //对报警限制做判断
+            Log.d("Task","Checking!");
+        }
     }
 
     private void loadBtBata() {
@@ -79,6 +124,8 @@ public class MainActivity extends BaseActivity
         }
         deviceAdapter.updateDeviceList(deviceList);
         recyclerView.setAdapter(deviceAdapter);
+
+
     }
 
     @Override
@@ -137,8 +184,27 @@ public class MainActivity extends BaseActivity
 
     @Override
     public void onClick(View v) {
-        Snackbar.make(v, "Replace with your own action", Snackbar.LENGTH_LONG)
-                .setAction("Action", null).show();
-        loadBtBata();
+        switch (v.getId()){
+            case R.id.fab:
+                //开启检测
+                if (!isChecking){
+                    Toa("START");
+                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
+                    initTimer();
+                    initTask();
+
+
+                    timer.scheduleAtFixedRate(timerTask, 1000, 10000);
+                    isChecking = true;
+                }else {
+                    Toa("STOP");
+                    fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
+                    timer.cancel();
+                    isChecking = false;
+                }
+                break;
+        }
     }
+
+
 }

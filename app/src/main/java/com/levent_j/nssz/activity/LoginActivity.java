@@ -61,6 +61,20 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                 }else {
                     userpasswordWraper.setErrorEnabled(false);
                 }
+
+                if (!mUsername.equals("admin")){
+                    usernameWraper.setError("用户名错误");
+                    break;
+                }else {
+                    usernameWraper.setErrorEnabled(false);
+                }
+                if (!mUserpassword.equals("admin")){
+                    userpasswordWraper.setError("密码错误");
+                    break;
+                }else {
+                    userpasswordWraper.setErrorEnabled(false);
+                }
+
                 startActivity(new Intent(LoginActivity.this,MainActivity.class));
                 break;
         }

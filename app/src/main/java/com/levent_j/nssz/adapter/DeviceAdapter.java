@@ -12,6 +12,8 @@ import com.levent_j.nssz.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -24,6 +26,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     private List<Device> deviceList;
     private final LayoutInflater layoutInflater;
 
+
     public DeviceAdapter(Context context){
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
@@ -32,7 +35,7 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
 
     @Override
     public mViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = layoutInflater.inflate(R.layout.item_device,null);
+        View view = layoutInflater.inflate(R.layout.item_device,parent,false);
         return new mViewHolder(view);
     }
 
@@ -44,7 +47,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
         holder.Di.setText("电流"+device.getI());
         holder.Dt.setText("温度"+device.getT());
         holder.Dw.setText("湿度"+device.getW());
-        holder.Dmove.setText(device.isMove()?"移动":"未移动");
     }
 
     @Override
@@ -69,8 +71,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
         TextView Dt;
         @Bind(R.id.tv_device_w)
         TextView Dw;
-        @Bind(R.id.tv_device_move)
-        TextView Dmove;
 
         public mViewHolder(View itemView) {
             super(itemView);
