@@ -51,9 +51,8 @@ public class MainActivity extends BaseActivity
     private Handler handler;
 
     private boolean isChecking = false;
+    private String mAddress;
 
-    public MainActivity() {
-    }
 
     @Override
     protected int getLayoutId() {
@@ -111,6 +110,10 @@ public class MainActivity extends BaseActivity
 
     private void loadBtBata() {
         //TODO:从蓝牙获取数据
+        mAddress = getIntent().getStringExtra("address");
+        //从Intent中获取数据
+
+
         deviceList.clear();
         for (int i=0;i<10;i++){
             Device device = new Device();
@@ -205,6 +208,7 @@ public class MainActivity extends BaseActivity
                 break;
         }
     }
+
 
 
 }

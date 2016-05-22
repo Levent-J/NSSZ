@@ -48,8 +48,6 @@
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
 
-        <!--<activity-->
-            <!--android:name=".activity.DeviceListActivity"></activity>-->
 
     </application>
 

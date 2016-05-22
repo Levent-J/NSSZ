@@ -25,6 +25,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/til_username">
         <EditText
+            android:singleLine="true"
             android:id="@+id/et_username"
             android:hint="输入用户名"
             android:layout_width="match_parent"
@@ -38,6 +39,7 @@
         android:layout_height="wrap_content"
         android:id="@+id/til_userpassword">
         <EditText
+            android:singleLine="true"
             android:inputType="textPassword"
             android:id="@+id/et_userpassword"
             android:hint="输入密码"

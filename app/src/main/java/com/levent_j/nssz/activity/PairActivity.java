@@ -7,11 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -33,15 +32,11 @@ import butterknife.Bind;
  */
 public class PairActivity extends BaseActivity implements View.OnClickListener {
     @Bind(R.id.btn_next)
-    Button next;
-    @Bind(R.id.btn_search)
-    Button search;
+    Button mNext;
+    @Bind(R.id.fab_discovery)
+    FloatingActionButton mDiscovery;
     @Bind(R.id.txt)
     TextView txt;
-//    @Bind(R.id.rv_new_list)
-//    RecyclerView mNewDeviceRecycler;
-//    @Bind(R.id.rv_paired_list)
-//    RecyclerView mPairedDeviceRecycler;
     @Bind(R.id.lv_new_list)
     ListView mNewListView;
     @Bind(R.id.lv_paired_list)
@@ -69,6 +64,7 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
     private ArrayAdapter<String> mNewAdapter;
 
     private boolean Flag = true;
+    private String mAddress;
 
     @Override
     protected int getLayoutId() {
@@ -113,8 +109,8 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void setListener() {
-        next.setOnClickListener(this);
-        search.setOnClickListener(this);
+        mNext.setOnClickListener(this);
+        mDiscovery.setOnClickListener(this);
     }
 
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
@@ -125,12 +121,13 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
             //获取mac地址
             String info = ((TextView)view).getText().toString();
             String address = info.substring(info.length()-17);
+            mAddress = address;
             //通过mac地址进行操作
             ConnectDevice(address);
         }
     };
 
-    private void ConnectDevice(String address) {
+    public void ConnectDevice(String address) {
         //通过mac地址得到设备
         mDevice = mBtAdapter.getRemoteDevice(address);
         //用UUID得到socket
@@ -143,7 +140,8 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
         //开始建立连接
         try {
             mSocket.connect();
-            Toa("链接"+mDevice.getName()+"成功！");
+            Snackbar.make(getCurrentFocus(),
+                    "已链接至蓝牙设备"+mDevice.getName()+"，开始读取数据", Snackbar.LENGTH_SHORT).show();
         } catch (IOException e) {
             Toa("链接断开！");
             try {
@@ -174,7 +172,7 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
     }
 
     //消息处理队列
-    Handler handler = new Handler(){
+    private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
@@ -183,13 +181,35 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
                 Flag = false;
             }else {
                 txt.setText(showMessage);
-                Toa(""+txt.getText());
+                //此时获取数据,即txt.getText();
+                //获取之后将其存在本地
+                //每次获取之后做一下判断，如果是最后一条数据，就跳入下一个界面
+                String data = txt.getText().toString();
+                if (isFinal(data)){
+                    Snackbar.make(getCurrentFocus(),"读取完毕",Snackbar.LENGTH_SHORT)
+                            .setCallback(new Snackbar.Callback() {
+                                @Override
+                                public void onDismissed(Snackbar snackbar, int event) {
+                                    super.onDismissed(snackbar, event);
+                                    Intent intent = new Intent(PairActivity.this,LoginActivity.class);
+                                    intent.putExtra("address",mAddress);
+                                    startActivity(intent);
+                                }
+                            })
+                            .show();
+                }
+                showMessage = "";
                 Flag = true;
             }
 
 
         }
     };
+
+    private boolean isFinal(String data) {
+        //判断
+        return true;
+    }
 
     //接收数据线程
     private Thread ReadThread = new Thread(){
@@ -225,11 +245,9 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
                         }
                         String s = new String(buffer_new,0,n);
                         showMessage+=s;   //写入接收缓存
-
                         if(inputStream.available()==0)break;  //短时间没有数据才跳出进行显示
                     }
                     //发送显示消息，进行显示刷新
-
                     handler.sendMessage(handler.obtainMessage());
                 } catch (IOException e){}
             }
@@ -260,9 +278,9 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_next:
-                startActivity(new Intent(PairActivity.this,DeviceListActivity.class));
+
                 break;
-            case R.id.btn_search:
+            case R.id.fab_discovery:
                 //搜索
                 if (!mBtAdapter.isEnabled()){
                     Toa("打开蓝牙中……");

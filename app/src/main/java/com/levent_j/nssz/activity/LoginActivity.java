@@ -28,6 +28,8 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     @Bind(R.id.til_userpassword)
     TextInputLayout userpasswordWraper;
 
+    private String mAddress;
+
     @Override
     protected int getLayoutId() {
         return R.layout.activity_login;
@@ -35,7 +37,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
 
     @Override
     protected void init() {
-
+        mAddress = getIntent().getStringExtra("address");
     }
 
     @Override
@@ -75,7 +77,9 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
                     userpasswordWraper.setErrorEnabled(false);
                 }
 
-                startActivity(new Intent(LoginActivity.this,MainActivity.class));
+                Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+                intent.putExtra("address",mAddress);
+                startActivity(intent);
                 break;
         }
     }
