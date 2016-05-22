@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.levent_j.nssz" >
 
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -43,6 +47,10 @@
             android:name=".activity.AboutActivity"
             android:theme="@style/AppTheme.NoActionBar" >
         </activity>
+
+        <!--<activity-->
+            <!--android:name=".activity.DeviceListActivity"></activity>-->
+
     </application>
 
 </manifest>

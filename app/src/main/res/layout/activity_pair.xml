@@ -1,10 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent">\
+
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:id="@+id/rv_new_list"-->
+        <!--android:scrollbars="none"-->
+        <!--android:clipToPadding="false"-->
+        <!--android:layout_weight="1"/>-->
+    <!--<android.support.v7.widget.RecyclerView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:id="@+id/rv_paired_list"-->
+        <!--android:scrollbars="none"-->
+        <!--android:clipToPadding="false"-->
+        <!--android:layout_weight="1"/>-->
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lv_new_list"
+        android:layout_weight="1"></ListView>
+    <ListView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/lv_paired_list"
+        android:layout_weight="1"></ListView>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="查询设备"
+        android:id="@+id/btn_search"/>
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/btn_next"
         android:text="下一个界面"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="XXX"
+        android:id="@+id/txt"/>
 </LinearLayout>
