@@ -31,8 +31,6 @@ import butterknife.Bind;
  * Created by levent_j on 16-5-5.
  */
 public class PairActivity extends BaseActivity implements View.OnClickListener {
-    @Bind(R.id.btn_next)
-    Button mNext;
     @Bind(R.id.fab_discovery)
     FloatingActionButton mDiscovery;
     @Bind(R.id.txt)
@@ -109,7 +107,6 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
 
     @Override
     protected void setListener() {
-        mNext.setOnClickListener(this);
         mDiscovery.setOnClickListener(this);
     }
 
@@ -263,7 +260,7 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
                 if (device.getBondState() != BluetoothDevice.BOND_BONDED){
                     mNewAdapter.add(device.getName()+"\n"+device.getAddress());
                 }else {
-                    mPairedAdapter.add(device.getName()+"\n"+device.getAddress());
+                    mPairedAdapter.add("设备名："+device.getName()+"\n"+"MAC地址："+device.getAddress());
                 }
             }else  if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
                 if (mNewAdapter.getCount() == 0){
@@ -277,9 +274,6 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.btn_next:
-
-                break;
             case R.id.fab_discovery:
                 //搜索
                 if (!mBtAdapter.isEnabled()){

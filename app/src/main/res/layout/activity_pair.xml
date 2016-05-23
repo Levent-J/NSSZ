@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
      android:layout_width="match_parent"
     android:layout_height="match_parent">
     <LinearLayout
@@ -30,20 +30,17 @@
             android:layout_height="match_parent"
             android:id="@+id/lv_paired_list"
             android:layout_weight="1"></ListView>
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/btn_next"
-            android:text="下一个界面"/>
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="XXX"
-            android:id="@+id/txt"/>
+            android:id="@+id/txt"
+            android:visibility="gone"/>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton android:id="@+id/fab_discovery"
         android:layout_width="wrap_content" android:layout_height="wrap_content"
         android:layout_gravity="bottom|end" android:layout_margin="@dimen/fab_margin"
         android:src="@drawable/ic_check" />
-</FrameLayout>
+</android.support.design.widget.CoordinatorLayout>
