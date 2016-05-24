@@ -35,8 +35,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="XXX"
-            android:id="@+id/txt"
-            android:visibility="gone"/>
+            android:id="@+id/txt"/>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton android:id="@+id/fab_discovery"

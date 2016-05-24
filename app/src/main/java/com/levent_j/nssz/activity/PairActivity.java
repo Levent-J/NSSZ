@@ -11,6 +11,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -120,136 +121,22 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
             String address = info.substring(info.length()-17);
             mAddress = address;
             //通过mac地址进行操作
-            ConnectDevice(address);
+            Intent intent = new Intent(PairActivity.this,LoginActivity.class);
+            intent.putExtra("address",mAddress);
+            startActivity(intent);
         }
     };
 
-    public void ConnectDevice(String address) {
-        //通过mac地址得到设备
-        mDevice = mBtAdapter.getRemoteDevice(address);
-        //用UUID得到socket
-        try {
-            mSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
-        } catch (IOException e) {
-            Toa("链接失败！");
-        }
-
-        //开始建立连接
-        try {
-            mSocket.connect();
-            Snackbar.make(getCurrentFocus(),
-                    "已链接至蓝牙设备"+mDevice.getName()+"，开始读取数据", Snackbar.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            Toa("链接断开！");
-            try {
-                mSocket.close();
-                mSocket = null;
-            } catch (IOException e1) {
-                Toa("链接失败！");
-            }
-            return;
-        }
-
-        //打开接收线程
-        try {
-            inputStream = mSocket.getInputStream();
-        } catch (IOException e) {
-            Toa("接收数据失败!");
-            return;
-        }
-
-        if (!bThread){
-            ReadThread.start();
-            bThread = true;
-        }else {
-            bRun = true;
-        }
 
 
-    }
 
-    //消息处理队列
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            if (Flag){
-                txt.setText(showMessage);
-                Flag = false;
-            }else {
-                txt.setText(showMessage);
-                //此时获取数据,即txt.getText();
-                //获取之后将其存在本地
-                //每次获取之后做一下判断，如果是最后一条数据，就跳入下一个界面
-                String data = txt.getText().toString();
-                if (isFinal(data)){
-                    Snackbar.make(getCurrentFocus(),"读取完毕",Snackbar.LENGTH_SHORT)
-                            .setCallback(new Snackbar.Callback() {
-                                @Override
-                                public void onDismissed(Snackbar snackbar, int event) {
-                                    super.onDismissed(snackbar, event);
-                                    Intent intent = new Intent(PairActivity.this,LoginActivity.class);
-                                    intent.putExtra("address",mAddress);
-                                    startActivity(intent);
-                                }
-                            })
-                            .show();
-                }
-                showMessage = "";
-                Flag = true;
-            }
-
-
-        }
-    };
 
     private boolean isFinal(String data) {
         //判断
         return true;
     }
 
-    //接收数据线程
-    private Thread ReadThread = new Thread(){
-        @Override
-        public void run() {
-            int num = 0;
-            byte[] buffer = new byte[1024];
-            byte[] buffer_new = new byte[1024];
-            int i = 0;
-            int n = 0;
-            bRun = true;
-            //接收线程
-            while(true){
-                try{
-                    while(inputStream.available()==0){
-                        while(bRun == false){}
-                    }
-                    while(true){
 
-                        num = inputStream.read(buffer);         //读入数据
-                        n=0;
-
-                        String s0 = new String(buffer,0,num);
-                        saveMessage+=s0;    //保存收到数据
-                        for(i=0;i<num;i++){
-                            if((buffer[i] == 0x0d)&&(buffer[i+1]==0x0a)){
-                                buffer_new[n] = 0x0a;
-                                i++;
-                            }else{
-                                buffer_new[n] = buffer[i];
-                            }
-                            n++;
-                        }
-                        String s = new String(buffer_new,0,n);
-                        showMessage+=s;   //写入接收缓存
-                        if(inputStream.available()==0)break;  //短时间没有数据才跳出进行显示
-                    }
-                    //发送显示消息，进行显示刷新
-                    handler.sendMessage(handler.obtainMessage());
-                } catch (IOException e){}
-            }
-        }
-    };
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override

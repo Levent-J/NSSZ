@@ -1,5 +1,8 @@
 package com.levent_j.nssz.activity;
 
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
@@ -16,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.levent_j.nssz.Entry.Device;
 import com.levent_j.nssz.R;
@@ -23,10 +27,14 @@ import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseActivity;
 import com.levent_j.nssz.utils.SpaceItemDecoration;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.UUID;
 
 import butterknife.Bind;
 
@@ -42,17 +50,37 @@ public class MainActivity extends BaseActivity
     NavigationView navigationView;
     @Bind(R.id.rv_devices)
     RecyclerView recyclerView;
+    @Bind(R.id.text)
+    TextView txt;
 
     private DeviceAdapter deviceAdapter;
     private List<Device> deviceList;
 
     private Timer timer;
     private TimerTask timerTask;
-    private Handler handler;
+    private Handler checkhandler;
 
     private boolean isChecking = false;
     private String mAddress;
 
+
+
+    //对接受数据进行准备
+    private InputStream inputStream;
+    private String showMessage = "";
+    private String saveMessage = "";
+
+    //设备及Socket
+    private BluetoothDevice mDevice;
+    private BluetoothSocket mSocket;
+
+    private boolean bRun = true;
+    private boolean bThread = false;
+
+    private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
+
+
+    private BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
     @Override
     protected int getLayoutId() {
@@ -77,7 +105,7 @@ public class MainActivity extends BaseActivity
 
         timer = new Timer();
         loadBtBata();
-        handler = new Handler(){
+        checkhandler = new Handler(){
             @Override
             public void handleMessage(Message msg) {
                 checkDevices();
@@ -93,7 +121,7 @@ public class MainActivity extends BaseActivity
             public void run() {
                 Message message = new Message();
                 message.what = 1;
-                handler.sendMessage(message);
+                checkhandler.sendMessage(message);
             }
         };
     }
@@ -111,7 +139,7 @@ public class MainActivity extends BaseActivity
     private void loadBtBata() {
         //TODO:从蓝牙获取数据
         mAddress = getIntent().getStringExtra("address");
-        //从Intent中获取数据
+        ConnectDevice(mAddress);
 
 
         deviceList.clear();
@@ -208,6 +236,124 @@ public class MainActivity extends BaseActivity
                 break;
         }
     }
+
+    public void ConnectDevice(String address) {
+        //通过mac地址得到设备
+        mDevice = mBtAdapter.getRemoteDevice(address);
+        //用UUID得到socket
+        try {
+            mSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
+        } catch (IOException e) {
+            Toa("链接失败！");
+        }
+
+        //开始建立连接
+        try {
+            mSocket.connect();
+
+        } catch (IOException e) {
+            Toa("链接断开！");
+            try {
+                mSocket.close();
+                mSocket = null;
+            } catch (IOException e1) {
+                Toa("链接失败！");
+            }
+            return;
+        }
+
+        //打开接收线程
+        try {
+            inputStream = mSocket.getInputStream();
+        } catch (IOException e) {
+            Toa("接收数据失败!");
+            return;
+        }
+
+        if (!bThread){
+            ReadThread.start();
+            bThread = true;
+        }else {
+            bRun = true;
+        }
+
+
+    }
+
+    //消息处理队列
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            txt.setText(showMessage);
+        }
+    };
+
+    //接收数据线程
+    private Thread ReadThread = new Thread(){
+        @Override
+        public void run() {
+            int num = 0;
+            byte[] buffer = new byte[1024];
+            byte[] buffer_new = new byte[1024];
+            char[] buffs = new char[7];
+            int i = 0;
+            int n = 0;
+            bRun = true;
+            //接收线程
+            while(true){
+                try{
+//
+//                    char buff = (char) inputStream.read();
+//                    Log.e("DATA","input"+buff);
+//                    if (i==6){
+//                        i=0;
+//
+//                        if (buffs[0]=='\r'){
+//                            showMessage="";
+//                            for (int j=1;j<buffs.length;j++){
+//                                showMessage += buffs[j];
+//                            }
+//                            handler.sendMessage(handler.obtainMessage());
+//                        }else {
+//                            Log.e("DATA","error data");
+//                        }
+//                    }else {
+//                            buffs[i] = buff;
+//                            i++;
+//                    }
+
+                    while(inputStream.available()==0){
+                        while(bRun == false){}
+                    }
+                    while(true){
+                        num = inputStream.read(buffer);         //读入数据
+                        n=0;
+
+                        String s0 = new String(buffer,0,num);
+                        saveMessage+=s0;    //保存收到数据
+                        for(i=0;i<num;i++){
+                            if((buffer[i] == 0x0d)&&(buffer[i+1]==0x0a)){
+                                buffer_new[n] = 0x0a;
+                                i++;
+                            }else{
+                                buffer_new[n] = buffer[i];
+                            }
+                            n++;
+                        }
+                        String s = new String(buffer_new,0,n);
+                        showMessage+=s;   //写入接收缓存
+                        if(inputStream.available()==0)break;  //短时间没有数据才跳出进行显示
+                    }
+                    //发送显示消息，进行显示刷新
+                    Log.e("DATA","message is"+showMessage+"]");
+                    handler.sendMessage(handler.obtainMessage());
+                } catch (IOException e){
+
+                }
+            }
+        }
+    };
 
 
 
