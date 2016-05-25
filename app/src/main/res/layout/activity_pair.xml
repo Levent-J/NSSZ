@@ -31,11 +31,6 @@
             android:id="@+id/lv_paired_list"
             android:layout_weight="1"></ListView>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="XXX"
-            android:id="@+id/txt"/>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton android:id="@+id/fab_discovery"

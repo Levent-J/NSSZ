@@ -4,58 +4,51 @@ package com.levent_j.nssz.Entry;
  * Created by levent_j on 16-5-6.
  */
 public class Device {
-    private String name;
-    private int v;
-    private int i;
-    private int t;
-    private int w;
-    private boolean move;
 
-    public String getName() {
-        return name;
+
+    private int deviceNumber;
+    private int Temperature;
+    private int temperatureDecimal;
+    private int humidity;
+    private int state;
+
+    public int getDeviceNumber() {
+        return deviceNumber;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setDeviceNumber(int deviceNumber) {
+        this.deviceNumber = deviceNumber;
     }
 
-    public int getV() {
-        return v;
+    public int getTemperature() {
+        return Temperature;
     }
 
-    public void setV(int v) {
-        this.v = v;
+    public void setTemperature(int temperature) {
+        Temperature = temperature;
     }
 
-    public int getI() {
-        return i;
+    public int getTemperatureDecimal() {
+        return temperatureDecimal;
     }
 
-    public void setI(int i) {
-        this.i = i;
+    public void setTemperatureDecimal(int temperatureDecimal) {
+        this.temperatureDecimal = temperatureDecimal;
     }
 
-    public int getT() {
-        return t;
+    public int getHumidity() {
+        return humidity;
     }
 
-    public void setT(int t) {
-        this.t = t;
+    public void setHumidity(int humidity) {
+        this.humidity = humidity;
     }
 
-    public int getW() {
-        return w;
+    public int getState() {
+        return state;
     }
 
-    public void setW(int w) {
-        this.w = w;
-    }
-
-    public boolean isMove() {
-        return move;
-    }
-
-    public void setMove(boolean move) {
-        this.move = move;
+    public void setState(int state) {
+        this.state = state;
     }
 }

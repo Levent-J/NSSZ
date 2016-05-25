@@ -34,8 +34,6 @@ import butterknife.Bind;
 public class PairActivity extends BaseActivity implements View.OnClickListener {
     @Bind(R.id.fab_discovery)
     FloatingActionButton mDiscovery;
-    @Bind(R.id.txt)
-    TextView txt;
     @Bind(R.id.lv_new_list)
     ListView mNewListView;
     @Bind(R.id.lv_paired_list)
@@ -62,7 +60,6 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
     private ArrayAdapter<String> mPairedAdapter;
     private ArrayAdapter<String> mNewAdapter;
 
-    private boolean Flag = true;
     private String mAddress;
 
     @Override
@@ -126,16 +123,6 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
             startActivity(intent);
         }
     };
-
-
-
-
-
-    private boolean isFinal(String data) {
-        //判断
-        return true;
-    }
-
 
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {

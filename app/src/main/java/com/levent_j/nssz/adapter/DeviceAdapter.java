@@ -12,8 +12,6 @@ import com.levent_j.nssz.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -42,11 +40,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     @Override
     public void onBindViewHolder(mViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        holder.Dname.setText("设备名："+device.getName());
-        holder.Dv.setText("电压"+device.getV());
-        holder.Di.setText("电流"+device.getI());
-        holder.Dt.setText("温度"+device.getT());
-        holder.Dw.setText("湿度"+device.getW());
+        holder.Dname.setText("标签卡："+device.getDeviceNumber()+"号");
+        holder.Dt.setText("温度:"+device.getTemperature()+"."+device.getTemperatureDecimal());
+        holder.Dw.setText("湿度:"+device.getHumidity());
     }
 
     @Override
@@ -63,10 +59,6 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     class mViewHolder extends RecyclerView.ViewHolder{
         @Bind(R.id.tv_device_name)
         TextView Dname;
-        @Bind(R.id.tv_device_v)
-        TextView Dv;
-        @Bind(R.id.tv_device_i)
-        TextView Di;
         @Bind(R.id.tv_device_t)
         TextView Dt;
         @Bind(R.id.tv_device_w)
