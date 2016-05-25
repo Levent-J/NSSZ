@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,7 +61,7 @@ public class MainActivity extends BaseActivity
     private boolean isChecking = false;
     private String mAddress;
 
-
+    private Vibrator vibrator;
 
     //对接受数据进行准备
     private InputStream inputStream;
@@ -86,6 +87,8 @@ public class MainActivity extends BaseActivity
 
     @Override
     protected void init() {
+        vibrator = (Vibrator) getSystemService(VIBRATOR_SERVICE);
+        getSystemService(VIBRATOR_SERVICE);
         deviceAdapter = new DeviceAdapter(this);
         deviceList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
@@ -110,24 +113,64 @@ public class MainActivity extends BaseActivity
         ConnectDevice(mAddress);
 
         //开启线程，每3秒发送一次数据
-        Thread sendHandler = new Thread(){
+//        Thread sendHandler = new Thread(){
+//            @Override
+//            public void run() {
+//                super.run();
+//                while (true){
+//                    sendMessage();
+//                    try {
+//                        sleep(3000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//
+//            }
+//        };
+//        sendHandler.start();
+
+        //开始循环填充假数据
+        new Thread(){
             @Override
             public void run() {
                 super.run();
                 while (true){
-                    sendMessage();
+                    loadFakeData();
                     try {
-                        sleep(3000);
+                        sleep(10000);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
                 }
-
             }
-        };
-        sendHandler.start();
+        }.start();
 
     }
+
+    private void loadFakeData() {
+        deviceList.clear();
+        for (int i=0;i<5;i++){
+            Device device = new Device();
+            device.setDeviceNumber(i);
+            device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
+            device.setTemperature((int) (0 + Math.random() * (100 - 0 + 1)));
+            device.setTemperatureDecimal((int) (0 + Math.random() * (100 - 0 + 1)));
+            device.setHumidity((int) (0 + Math.random() * (100 - 0 + 1)));
+            deviceList.add(device);
+            Fakehandler.sendMessage(Fakehandler.obtainMessage());
+        }
+
+    }
+
+    private Handler Fakehandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            deviceAdapter.updateDeviceList(deviceList);
+            recyclerView.setAdapter(deviceAdapter);
+        }
+    };
 
     private void initView() {
         setSupportActionBar(toolbar);
@@ -161,9 +204,11 @@ public class MainActivity extends BaseActivity
             //对报警限制做判断
             if (device.getState()==3){
                 Toa("标签卡"+device.getDeviceNumber()+"收到了震动！！！");
+                vibrator.vibrate(2000);
             }
             if (device.getState()==4){
                 Toa("标签卡"+device.getDeviceNumber()+"被非法移动了！！！");
+                vibrator.vibrate(2000);
             }
             //温度湿度检测另算
         }
