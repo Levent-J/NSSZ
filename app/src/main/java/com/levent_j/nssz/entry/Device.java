@@ -1,4 +1,4 @@
-package com.levent_j.nssz.Entry;
+package com.levent_j.nssz.entry;
 
 /**
  * Created by levent_j on 16-5-6.

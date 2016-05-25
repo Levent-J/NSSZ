@@ -7,7 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.levent_j.nssz.Entry.Device;
+import com.levent_j.nssz.entry.Device;
 import com.levent_j.nssz.R;
 
 import java.util.ArrayList;
@@ -41,8 +41,8 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     public void onBindViewHolder(mViewHolder holder, int position) {
         Device device = deviceList.get(position);
         holder.Dname.setText("标签卡："+device.getDeviceNumber()+"号");
-        holder.Dt.setText("温度:"+device.getTemperature()+"."+device.getTemperatureDecimal());
-        holder.Dw.setText("湿度:"+device.getHumidity());
+        holder.Dt.setText("温度:"+device.getTemperature()+"."+device.getTemperatureDecimal()+"℃");
+        holder.Dw.setText("湿度:"+device.getHumidity()+"%");
     }
 
     @Override

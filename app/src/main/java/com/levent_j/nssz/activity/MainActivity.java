@@ -19,9 +19,8 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.TextView;
 
-import com.levent_j.nssz.Entry.Device;
+import com.levent_j.nssz.entry.Device;
 import com.levent_j.nssz.R;
 import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseActivity;
@@ -73,7 +72,11 @@ public class MainActivity extends BaseActivity
     private boolean bRun = true;
     private boolean bThread = false;
 
+    //接收到的数据
     private int[] details = new int[5];
+
+    public static int Temperature = 100;
+    public static int Humidity = 100;
 
     private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
 
@@ -131,20 +134,20 @@ public class MainActivity extends BaseActivity
 //        sendHandler.start();
 
         //开始循环填充假数据
-        new Thread(){
-            @Override
-            public void run() {
-                super.run();
-                while (true){
-                    loadFakeData();
-                    try {
-                        sleep(10000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }.start();
+//        new Thread(){
+//            @Override
+//            public void run() {
+//                super.run();
+//                while (true){
+//                    loadFakeData();
+//                    try {
+//                        sleep(10000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        }.start();
 
     }
 
@@ -211,6 +214,14 @@ public class MainActivity extends BaseActivity
                 vibrator.vibrate(2000);
             }
             //温度湿度检测另算
+            if (device.getTemperature()>=Temperature){
+                Toa("标签卡"+device.getDeviceNumber()+"温度过高！！！");
+                vibrator.vibrate(2000);
+            }
+            if (device.getHumidity()>=Humidity){
+                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！！！");
+                vibrator.vibrate(2000);
+            }
         }
     }
 
@@ -380,7 +391,7 @@ public class MainActivity extends BaseActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+//            super.onBackPressed();
         }
     }
 
@@ -400,7 +411,8 @@ public class MainActivity extends BaseActivity
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            startActivity(new Intent(MainActivity.this,SetActivity.class));
+            Intent intent = new Intent(MainActivity.this,SetActivity.class);
+            startActivity(intent);
             return true;
         }
 
