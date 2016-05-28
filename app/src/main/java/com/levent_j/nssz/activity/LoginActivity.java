@@ -49,6 +49,7 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
     public void onClick(View v) {
         switch (v.getId()){
             case R.id.btn_login:
+                //管理员账号密码均为admin
                 String mUsername = usernameWraper.getEditText().getText().toString().trim();
                 String mUserpassword = userpasswordWraper.getEditText().getText().toString().trim();
                 if (TextUtils.isEmpty(mUsername)){

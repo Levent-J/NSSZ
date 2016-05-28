@@ -25,36 +25,31 @@
             android:text="设备名"
             android:id="@+id/tv_device_name" />
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_weight="1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
             <TextView
+                android:layout_weight="1"
+                android:gravity="center"
                 android:textColor="@color/colorWhite"
                 android:textSize="@dimen/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="温度"
-                android:id="@+id/tv_device_t"
-                android:layout_marginRight="70dp"
-                android:layout_marginEnd="70dp"
-                android:layout_alignTop="@+id/tv_device_w"
-                android:layout_alignParentRight="true"
-                android:layout_alignParentEnd="true" />
+                android:id="@+id/tv_device_t"/>
             <TextView
+                android:gravity="center"
+                android:layout_weight="1"
                 android:textColor="@color/colorWhite"
                 android:textSize="@dimen/text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="湿度"
-                android:id="@+id/tv_device_w"
-                android:layout_centerVertical="true"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
-                android:layout_marginLeft="70dp"
-                android:layout_marginStart="74dp" />
+                android:id="@+id/tv_device_w" />
 
-        </RelativeLayout>
+        </LinearLayout>
 
 
     </LinearLayout>

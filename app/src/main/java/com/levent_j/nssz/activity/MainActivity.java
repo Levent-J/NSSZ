@@ -115,6 +115,10 @@ public class MainActivity extends BaseActivity
         mAddress = getIntent().getStringExtra("address");
         ConnectDevice(mAddress);
 
+
+        //测试用填充假数据
+//        loadFakeData();
+
         //开启线程，每3秒发送一次数据
 //        Thread sendHandler = new Thread(){
 //            @Override
@@ -133,21 +137,6 @@ public class MainActivity extends BaseActivity
 //        };
 //        sendHandler.start();
 
-        //开始循环填充假数据
-//        new Thread(){
-//            @Override
-//            public void run() {
-//                super.run();
-//                while (true){
-//                    loadFakeData();
-//                    try {
-//                        sleep(10000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//            }
-//        }.start();
 
     }
 
@@ -157,9 +146,9 @@ public class MainActivity extends BaseActivity
             Device device = new Device();
             device.setDeviceNumber(i);
             device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
-            device.setTemperature((int) (0 + Math.random() * (100 - 0 + 1)));
+            device.setTemperature((int) (25 + Math.random() * (30 - 25 + 1)));
             device.setTemperatureDecimal((int) (0 + Math.random() * (100 - 0 + 1)));
-            device.setHumidity((int) (0 + Math.random() * (100 - 0 + 1)));
+            device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
             deviceList.add(device);
             Fakehandler.sendMessage(Fakehandler.obtainMessage());
         }
@@ -206,7 +195,7 @@ public class MainActivity extends BaseActivity
         for (Device device:deviceList){
             //对报警限制做判断
             if (device.getState()==3){
-                Toa("标签卡"+device.getDeviceNumber()+"收到了震动！！！");
+                Toa("标签卡"+device.getDeviceNumber()+"受到了震动！！！");
                 vibrator.vibrate(2000);
             }
             if (device.getState()==4){
@@ -232,9 +221,35 @@ public class MainActivity extends BaseActivity
         device.setTemperature(details[2]);
         device.setTemperatureDecimal(details[3]);
         device.setHumidity(details[4]);
-        deviceList.add(device);
+
+        //判断一下是否存在
+        if (isExist(details[1])){
+            int index = getIndex(details[1]);
+            deviceList.set(index,device);
+        }else {
+            deviceList.add(device);
+        }
+
         deviceAdapter.updateDeviceList(deviceList);
         recyclerView.setAdapter(deviceAdapter);
+    }
+
+    private int getIndex(int i) {
+        for (int j=0;j<deviceList.size();j++){
+            if (i==deviceList.get(j).getDeviceNumber()){
+                return j;
+            }
+        }
+        return 0;
+    }
+
+    private boolean isExist(int name) {
+        for (Device d:deviceList){
+            if (d.getDeviceNumber()==name){
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
@@ -366,7 +381,7 @@ public class MainActivity extends BaseActivity
                     Log.e("DATA","size="+size);
                     //发送显示消息，进行显示刷新
                     //判断缓存区是否已满
-                    if (size==9){
+                    if (size>=9){
                         size=0;
                         Log.e("DATA","0=<"+Integer.parseInt(String.valueOf(buffer_cache[0]))+">1=<"+Integer.parseInt(String.valueOf(buffer_cache[1]))+">");
                         if ((Integer.parseInt(String.valueOf(buffer_cache[0]))==13)&&(Integer.parseInt(String.valueOf(buffer_cache[1]))==10)
