@@ -9,14 +9,13 @@ import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 
 import com.levent_j.nssz.R;
-import com.levent_j.nssz.activity.MainActivity;
 import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseFragment;
 import com.levent_j.nssz.entry.Device;
@@ -38,40 +37,41 @@ import butterknife.OnClick;
  * Created by levent_j on 16-7-28.
  */
 public class DeviceFragment extends BaseFragment{
-    @Bind(R.id.fab)
-    FloatingActionButton fab;
-    @Bind(R.id.rv_devices)
-    RecyclerView recyclerView;
+    @Bind(R.id.fab) FloatingActionButton fab;
+    @Bind(R.id.rv_devices) RecyclerView recyclerView;
 
+    /**设备列表*/
     private DeviceAdapter deviceAdapter;
     private List<Device> deviceList;
 
+    /**报警检测*/
     private Timer timer;
     private TimerTask timerTask;
-    private Handler checkhandler;
-
     private boolean isChecking = false;
 
-    private Vibrator vibrator;
-
-    //对接受数据进行准备
-    private InputStream inputStream;
-
-    //设备及Socket
-    private BluetoothDevice mDevice;
-    private BluetoothSocket mSocket;
-
-    private boolean bRun = true;
-    private boolean bThread = false;
-
-    //接收到的数据
-    private int[] details = new int[5];
-
+    /**报警检测，温服、湿度*/
     public static int Temperature = 100;
     public static int Humidity = 100;
 
+    /**振动器*/
+    private Vibrator vibrator;
+
+    /**蓝牙输入流*/
+    private InputStream inputStream;
+
+    /**蓝牙串口uuid*/
     private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
 
+    /**蓝牙设备及socket*/
+    private BluetoothDevice mDevice;
+    private BluetoothSocket mSocket;
+
+    /**蓝牙链接状态*/
+    private boolean bRun = true;
+    private boolean bThread = false;
+
+    /**蓝牙接收数据缓存池*/
+    private int[] mDeviceDetail = new int[5];
 
     private BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
 
@@ -86,34 +86,24 @@ public class DeviceFragment extends BaseFragment{
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-//        super.onViewCreated(view, savedInstanceState);
         /**开启振动*/
         vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 
+        deviceList = new ArrayList<>();
+
         /**实例化adapter与list*/
         deviceAdapter = new DeviceAdapter(getContext());
-        deviceList = new ArrayList<>();
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setHasFixedSize(true);
-        int spacingInPixels = getResources().getDimensionPixelSize(R.dimen.space);
-        recyclerView.addItemDecoration(new SpaceItemDecoration(spacingInPixels));
+        recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.space)));
         recyclerView.setAdapter(deviceAdapter);
-        /**初始化检测设备的task*/
-        timer = new Timer();
-        checkhandler = new Handler(){
-            @Override
-            public void handleMessage(Message msg) {
-                checkDevices();
-                super.handleMessage(msg);
-            }
-        };
-        initTask();
 
+        /**初始化检测设备的task*/
+        initCheckTask();
 
         //TODO:暂时以假数据测试，之后要去掉注释的
 //        ConnectDevice(MainActivity.mAddress);
-
 
         //TODO:测试用填充假数据
         loadFakeData();
@@ -135,8 +125,6 @@ public class DeviceFragment extends BaseFragment{
 //            }
 //        };
 //        sendHandler.start();
-
-
     }
 
     private void loadFakeData() {
@@ -149,8 +137,10 @@ public class DeviceFragment extends BaseFragment{
             device.setTemperatureDecimal((int) (0 + Math.random() * (100 - 0 + 1)));
             device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
             deviceList.add(device);
-            Fakehandler.sendMessage(Fakehandler.obtainMessage());
+//            Fakehandler.sendMessage(Fakehandler.obtainMessage());
         }
+        deviceAdapter.updateDeviceList(deviceList);
+        recyclerView.setAdapter(deviceAdapter);
 
     }
 
@@ -163,18 +153,52 @@ public class DeviceFragment extends BaseFragment{
         }
     };
 
-    private void initTask() {
+    private Handler checkHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            checkDevices();
+            super.handleMessage(msg);
+        }
+    };
+
+    /**处理获取到的设备信息*/
+    private Handler loadDateHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+            Device device = new Device();
+            device.setState(mDeviceDetail[0]);
+            device.setDeviceNumber(mDeviceDetail[1]);
+            device.setTemperature(mDeviceDetail[2]);
+            device.setTemperatureDecimal(mDeviceDetail[3]);
+            device.setHumidity(mDeviceDetail[4]);
+
+            //判断一下是否存在
+            if (isExist(mDeviceDetail[1])){
+                int index = getIndex(mDeviceDetail[1]);
+                deviceList.set(index,device);
+            }else {
+                deviceList.add(device);
+            }
+
+            deviceAdapter.updateDeviceList(deviceList);
+            recyclerView.setAdapter(deviceAdapter);
+        }
+    };
+
+
+    private void initCheckTask(){
+        timer = new Timer();
+
         timerTask = new TimerTask() {
             @Override
             public void run() {
                 Message message = new Message();
                 message.what = 1;
-                checkhandler.sendMessage(message);
+                checkHandler.sendMessage(message);
             }
         };
-    }
-    private void initTimer() {
-        timer = new Timer();
     }
 
     private void checkDevices() {
@@ -200,25 +224,6 @@ public class DeviceFragment extends BaseFragment{
         }
     }
 
-    private void loadBtBata() {
-        Device device = new Device();
-        device.setState(details[0]);
-        device.setDeviceNumber(details[1]);
-        device.setTemperature(details[2]);
-        device.setTemperatureDecimal(details[3]);
-        device.setHumidity(details[4]);
-
-        //判断一下是否存在
-        if (isExist(details[1])){
-            int index = getIndex(details[1]);
-            deviceList.set(index,device);
-        }else {
-            deviceList.add(device);
-        }
-
-        deviceAdapter.updateDeviceList(deviceList);
-        recyclerView.setAdapter(deviceAdapter);
-    }
 
     private int getIndex(int i) {
         for (int j=0;j<deviceList.size();j++){
@@ -251,16 +256,15 @@ public class DeviceFragment extends BaseFragment{
     }
 
     public void ConnectDevice(String address) {
-        //通过mac地址得到设备
+        /**通过mac地址得到设备*/
         mDevice = mBtAdapter.getRemoteDevice(address);
-        //用UUID得到socket
+        /**用UUID得到socket*/
         try {
             mSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
         } catch (IOException e) {
             Toa("链接失败！");
         }
-
-        //开始建立连接
+        /**开始建立连接*/
         try {
             mSocket.connect();
 
@@ -274,8 +278,7 @@ public class DeviceFragment extends BaseFragment{
             }
             return;
         }
-
-        //打开接收线程
+        /**打开接收线程*/
         try {
             inputStream = mSocket.getInputStream();
         } catch (IOException e) {
@@ -289,20 +292,9 @@ public class DeviceFragment extends BaseFragment{
         }else {
             bRun = true;
         }
-
-
     }
 
-    //消息处理队列
-    private Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            loadBtBata();
-        }
-    };
-
-    //接收数据线程
+    /**接收数据线程*/
     private Thread ReadThread = new Thread(){
         @Override
         public void run() {
@@ -321,7 +313,7 @@ public class DeviceFragment extends BaseFragment{
                     while(true){
                         //获取本次读取到的字节长度
                         num = inputStream.read(buffer);
-                        Log.e("DATA","num"+num);
+                        Log.e("DATA","字节长度="+num);
 
                         //新方法
                         for (i=0;i<num;i++){
@@ -338,14 +330,17 @@ public class DeviceFragment extends BaseFragment{
                     //判断缓存区是否已满
                     if (size>=9){
                         size=0;
-                        Log.e("DATA","0=<"+Integer.parseInt(String.valueOf(buffer_cache[0]))+">1=<"+Integer.parseInt(String.valueOf(buffer_cache[1]))+">");
-                        if ((Integer.parseInt(String.valueOf(buffer_cache[0]))==13)&&(Integer.parseInt(String.valueOf(buffer_cache[1]))==10)
-                                &&(Integer.parseInt(String.valueOf(buffer_cache[7]))==10)&&(Integer.parseInt(String.valueOf(buffer_cache[8]))==13)){
+                        Log.e("DATA","0=<"+Integer.parseInt(String.valueOf(buffer_cache[0]))
+                                +">1=<"+Integer.parseInt(String.valueOf(buffer_cache[1]))+">");
+                        if ((Integer.parseInt(String.valueOf(buffer_cache[0]))==13)
+                                &&(Integer.parseInt(String.valueOf(buffer_cache[1]))==10)
+                                &&(Integer.parseInt(String.valueOf(buffer_cache[7]))==10)
+                                &&(Integer.parseInt(String.valueOf(buffer_cache[8]))==13)){
                             for (int j=2;j<7;j++){
-                                details[j-2]=buffer_cache[j];
+                                mDeviceDetail[j-2]=buffer_cache[j];
                             }
 
-                            handler.sendMessage(handler.obtainMessage());
+                            loadDateHandler.sendMessage(loadDateHandler.obtainMessage());
                         }
                     }
                 } catch (IOException e){
@@ -356,21 +351,26 @@ public class DeviceFragment extends BaseFragment{
     };
 
     @OnClick(R.id.fab)
-    public void onClickCheckBtn(){
+    public void onClickCheckBtn(View view){
         if (!isChecking){
-            Toa("START");
+            Snackbar.make(view,"开启检测",Snackbar.LENGTH_SHORT).show();
+
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
-            initTimer();
-            initTask();
-
-
+            initCheckTask();
             timer.scheduleAtFixedRate(timerTask, 1000, 10000);
             isChecking = true;
         }else {
-            Toa("STOP");
+            Snackbar.make(view,"关闭检测",Snackbar.LENGTH_SHORT).show();
+
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
             timer.cancel();
             isChecking = false;
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        checkHandler.removeCallbacksAndMessages(null);
     }
 }

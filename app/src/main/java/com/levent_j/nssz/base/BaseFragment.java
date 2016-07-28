@@ -45,8 +45,4 @@ public abstract class BaseFragment extends Fragment {
         Toast.makeText(getActivity(), s, Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 }

@@ -1,18 +1,7 @@
 package com.levent_j.nssz.activity;
 
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.Message;
-import android.os.Vibrator;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -22,22 +11,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 import com.levent_j.nssz.base.BaseFragment;
-import com.levent_j.nssz.entry.Device;
 import com.levent_j.nssz.R;
-import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseActivity;
 import com.levent_j.nssz.fragment.AboutFragment;
 import com.levent_j.nssz.fragment.DeviceFragment;
-import com.levent_j.nssz.utils.SpaceItemDecoration;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
-import java.util.UUID;
 
 import butterknife.Bind;
 
@@ -49,11 +26,8 @@ public class MainActivity extends BaseActivity
 
     @Bind(R.id.drawer_layout) DrawerLayout drawer;
 
-
-
     /**蓝牙设备的mac地址*/
-    public static String mAddress;
-
+    public static String mDeviceMacAddress;
     /**管理fragment*/
     private FragmentManager fragmentManager;
     private BaseFragment[] fragments = new BaseFragment[2];
@@ -72,26 +46,20 @@ public class MainActivity extends BaseActivity
         setTitle("设备列表");
         navigationView.setCheckedItem(R.id.nav_main);
 
-        /**通过获取mac地址来建立通信*/
-        mAddress = getIntent().getStringExtra("address");
-
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        drawer.setDrawerListener(toggle);
+        drawer.addDrawerListener(toggle);
         toggle.syncState();
         navigationView.setNavigationItemSelectedListener(this);
-
-
     }
 
     @Override
     public void onBackPressed() {
-//        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-//            super.onBackPressed();
+            //TODO:作退出的判断
         }
     }
 

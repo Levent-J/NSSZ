@@ -7,15 +7,10 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Handler;
-import android.os.Message;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -23,8 +18,6 @@ import com.levent_j.nssz.R;
 import com.levent_j.nssz.base.BaseActivity;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.UUID;
 
 import butterknife.Bind;
 import butterknife.OnClick;
@@ -33,35 +26,22 @@ import butterknife.OnClick;
  * Created by levent_j on 16-5-5.
  */
 public class PairActivity extends BaseActivity{
-    @Bind(R.id.fab_discovery)
-    FloatingActionButton mDiscovery;
     @Bind(R.id.lv_new_list)
     ListView mNewListView;
     @Bind(R.id.lv_paired_list)
     ListView mPairedListView;
 
-    private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
-
-    //对接受数据进行准备
-    private InputStream inputStream;
-    private String showMessage = "";
-    private String saveMessage = "";
-
-    //设备及Socket
-    private BluetoothDevice mDevice;
     private BluetoothSocket mSocket;
 
-    private boolean bRun = true;
-    private boolean bThread = false;
+    /**获取本机的bluetoothAdapter*/
+    private BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-    private BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-
-    //搜索相关
+    /**搜索设备相关adapter*/
     private BluetoothAdapter mSearchBtAdapter;
     private ArrayAdapter<String> mPairedAdapter;
     private ArrayAdapter<String> mNewAdapter;
 
-    private String mAddress;
+    private String mDeviceMacAddress;
 
     @Override
     protected int getLayoutId() {
@@ -70,32 +50,34 @@ public class PairActivity extends BaseActivity{
 
     @Override
     protected void init() {
-        if (mBtAdapter ==null){
+        if (bluetoothAdapter ==null){
             Toa("该手机不支持蓝牙");
         }
 
+        /**开启蓝牙*/
         new Thread(){
             @Override
             public void run() {
                 super.run();
-                if (!mBtAdapter.isEnabled()){
-                    mBtAdapter.enable();
+                if (!bluetoothAdapter.isEnabled()){
+                    bluetoothAdapter.enable();
                 }
             }
         }.start();
 
-        //初始化设备存储数组
-        mPairedAdapter = new ArrayAdapter<String>(this,R.layout.device_name);
-        mNewAdapter = new ArrayAdapter<String>(this,R.layout.device_name);
+        /**初始化adapter*/
+        mPairedAdapter = new ArrayAdapter<>(this,R.layout.device_name);
+        mNewAdapter = new ArrayAdapter<>(this,R.layout.device_name);
 
-        //设置列表
+        /**填充数据*/
         mPairedListView.setAdapter(mPairedAdapter);
         mNewListView.setAdapter(mNewAdapter);
 
-        //设置共同的监听事件
+        /**设置共同的监听器*/
         mPairedListView.setOnItemClickListener(mDeviceClickListener);
+        mNewListView.setOnItemClickListener(mDeviceClickListener);
 
-        //注册接收器
+        /**注册广播接收器*/
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_FOUND);
         this.registerReceiver(mReceiver,filter);
         filter = new IntentFilter(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
@@ -108,15 +90,15 @@ public class PairActivity extends BaseActivity{
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            //准备链接设备，关闭查找
+            /**准备链接设备，关闭查找*/
             mSearchBtAdapter.cancelDiscovery();
-            //获取mac地址
+            /**获取设备信息*/
             String info = ((TextView)view).getText().toString();
             String address = info.substring(info.length()-17);
-            mAddress = address;
-            //通过mac地址进行操作
+            mDeviceMacAddress = address;
+            /**将mac地址传给MainActivity*/
+            MainActivity.mDeviceMacAddress = mDeviceMacAddress;
             Intent intent = new Intent(PairActivity.this,LoginActivity.class);
-            intent.putExtra("address",mAddress);
             startActivity(intent);
         }
     };
@@ -143,23 +125,28 @@ public class PairActivity extends BaseActivity{
     };
 
     @OnClick(R.id.fab_discovery)
-    public void onDiscovery(){
+    public void onDiscovery(View view){
         //搜索
-        if (!mBtAdapter.isEnabled()){
-            Toa("打开蓝牙中……");
+        if (!bluetoothAdapter.isEnabled()){
+            Snackbar.make(view,"打开蓝牙中",Snackbar.LENGTH_SHORT).show();
         }else {
             if (mSocket==null){
-                //进行搜索
-                SearchDevices();
+                /**进行搜索*/
+                Snackbar.make(view,"正在搜索设备",Snackbar.LENGTH_SHORT).show();
+                if (mSearchBtAdapter.isDiscovering()){
+                    mSearchBtAdapter.cancelDiscovery();
+                }
+                mSearchBtAdapter.startDiscovery();
+//                SearchDevices();
             }else {
-                //关闭Socket
+//                //关闭Socket
                 try {
-                    inputStream.close();
+//                    inputStream.close();
                     mSocket.close();
                     mSocket = null;
-                    bRun = false;
+//                    bRun = false;
                 } catch (IOException e) {
-                    e.printStackTrace();
+//                    e.printStackTrace();
                 }
 
             }
