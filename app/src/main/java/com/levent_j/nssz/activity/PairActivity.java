@@ -27,11 +27,12 @@ import java.io.InputStream;
 import java.util.UUID;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * Created by levent_j on 16-5-5.
  */
-public class PairActivity extends BaseActivity implements View.OnClickListener {
+public class PairActivity extends BaseActivity{
     @Bind(R.id.fab_discovery)
     FloatingActionButton mDiscovery;
     @Bind(R.id.lv_new_list)
@@ -103,10 +104,6 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
         mSearchBtAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
-    @Override
-    protected void setListener() {
-        mDiscovery.setOnClickListener(this);
-    }
 
     private AdapterView.OnItemClickListener mDeviceClickListener = new AdapterView.OnItemClickListener() {
         @Override
@@ -145,31 +142,27 @@ public class PairActivity extends BaseActivity implements View.OnClickListener {
         }
     };
 
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.fab_discovery:
-                //搜索
-                if (!mBtAdapter.isEnabled()){
-                    Toa("打开蓝牙中……");
-                }else {
-                    if (mSocket==null){
-                        //进行搜索
-                        SearchDevices();
-                    }else {
-                        //关闭Socket
-                        try {
-                            inputStream.close();
-                            mSocket.close();
-                            mSocket = null;
-                            bRun = false;
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                    }
+    @OnClick(R.id.fab_discovery)
+    public void onDiscovery(){
+        //搜索
+        if (!mBtAdapter.isEnabled()){
+            Toa("打开蓝牙中……");
+        }else {
+            if (mSocket==null){
+                //进行搜索
+                SearchDevices();
+            }else {
+                //关闭Socket
+                try {
+                    inputStream.close();
+                    mSocket.close();
+                    mSocket = null;
+                    bRun = false;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-                break;
+
+            }
         }
     }
 

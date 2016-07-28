@@ -17,8 +17,4 @@ public class AboutActivity extends BaseActivity{
 
     }
 
-    @Override
-    protected void setListener() {
-
-    }
 }

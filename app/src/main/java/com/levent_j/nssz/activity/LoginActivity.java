@@ -12,11 +12,12 @@ import com.levent_j.nssz.R;
 import com.levent_j.nssz.base.BaseActivity;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * Created by levent_j on 16-5-5.
  */
-public class LoginActivity extends BaseActivity implements View.OnClickListener {
+public class LoginActivity extends BaseActivity{
     @Bind(R.id.btn_login)
     Button login;
     @Bind(R.id.et_username)
@@ -40,48 +41,39 @@ public class LoginActivity extends BaseActivity implements View.OnClickListener 
         mAddress = getIntent().getStringExtra("address");
     }
 
-    @Override
-    protected void setListener() {
-        login.setOnClickListener(this);
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.btn_login:
-                //管理员账号密码均为admin
-                String mUsername = usernameWraper.getEditText().getText().toString().trim();
-                String mUserpassword = userpasswordWraper.getEditText().getText().toString().trim();
-                if (TextUtils.isEmpty(mUsername)){
-                    usernameWraper.setError("用户名不能为空");
-                    break;
-                }else {
-                    usernameWraper.setErrorEnabled(false);
-                }
-                if (TextUtils.isEmpty(mUserpassword)){
-                    userpasswordWraper.setError("密码不能为空");
-                    break;
-                }else {
-                    userpasswordWraper.setErrorEnabled(false);
-                }
-
-                if (!mUsername.equals("admin")){
-                    usernameWraper.setError("用户名错误");
-                    break;
-                }else {
-                    usernameWraper.setErrorEnabled(false);
-                }
-                if (!mUserpassword.equals("admin")){
-                    userpasswordWraper.setError("密码错误");
-                    break;
-                }else {
-                    userpasswordWraper.setErrorEnabled(false);
-                }
-
-                Intent intent = new Intent(LoginActivity.this,MainActivity.class);
-                intent.putExtra("address",mAddress);
-                startActivity(intent);
-                break;
+    @OnClick(R.id.btn_login)
+    public void onLogin(){
+        //管理员账号密码均为admin
+        String mUsername = usernameWraper.getEditText().getText().toString().trim();
+        String mUserpassword = userpasswordWraper.getEditText().getText().toString().trim();
+        if (TextUtils.isEmpty(mUsername)){
+            usernameWraper.setError("用户名不能为空");
+            return;
+        }else {
+            usernameWraper.setErrorEnabled(false);
         }
+        if (TextUtils.isEmpty(mUserpassword)){
+            userpasswordWraper.setError("密码不能为空");
+            return;
+        }else {
+            userpasswordWraper.setErrorEnabled(false);
+        }
+
+        if (!mUsername.equals("admin")){
+            usernameWraper.setError("用户名错误");
+            return;
+        }else {
+            usernameWraper.setErrorEnabled(false);
+        }
+        if (!mUserpassword.equals("admin")){
+            userpasswordWraper.setError("密码错误");
+            return;
+        }else {
+            userpasswordWraper.setErrorEnabled(false);
+        }
+
+        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+        intent.putExtra("address",mAddress);
+        startActivity(intent);
     }
 }

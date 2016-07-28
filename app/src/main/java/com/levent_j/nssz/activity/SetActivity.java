@@ -7,8 +7,10 @@ import android.widget.EditText;
 
 import com.levent_j.nssz.R;
 import com.levent_j.nssz.base.BaseActivity;
+import com.levent_j.nssz.fragment.DeviceFragment;
 
 import butterknife.Bind;
+import butterknife.OnClick;
 
 /**
  * Created by levent_j on 16-5-5.
@@ -31,8 +33,8 @@ public class SetActivity extends BaseActivity{
     protected void init() {
     }
 
-    @Override
-    protected void setListener() {
+    @OnClick(R.id.btn_confirm)
+    public void Confirm(){
         mConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -42,8 +44,8 @@ public class SetActivity extends BaseActivity{
                     Toa("请填写正确湿度");
                 }else {
                     try {
-                        MainActivity.Temperature = Integer.parseInt(mTemperature.getText().toString().trim());
-                        MainActivity.Humidity = Integer.parseInt(mHumidity.getText().toString().trim());
+                        DeviceFragment.Temperature = Integer.parseInt(mTemperature.getText().toString().trim());
+                        DeviceFragment.Humidity = Integer.parseInt(mHumidity.getText().toString().trim());
                         finish();
                     }catch (NumberFormatException e){
                         Toa("请填写正确数值");
@@ -54,4 +56,5 @@ public class SetActivity extends BaseActivity{
             }
         });
     }
+
 }

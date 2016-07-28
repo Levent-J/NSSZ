@@ -14,7 +14,7 @@ import butterknife.ButterKnife;
  */
 
 public abstract class BaseActivity extends AppCompatActivity {
-    public String TAG;
+public String TAG;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,16 +22,15 @@ public abstract class BaseActivity extends AppCompatActivity {
         setContentView(getLayoutId());
         ButterKnife.bind(this);
         init();
-        setListener();
         TAG = this.getClass().getSimpleName();
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
     }
+
 
     protected abstract int getLayoutId();
 
     protected abstract void init();
 
-    protected abstract void setListener();
 
     protected void msg(String s) {
         Log.d(TAG, s);
