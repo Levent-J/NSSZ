@@ -60,7 +60,7 @@ public class LoginActivity extends BaseActivity{
 //            passwordWraper.setErrorEnabled(false);
 //        }
 
-        Intent intent = new Intent(LoginActivity.this,MainActivity.class);
+        Intent intent = new Intent(LoginActivity.this,PairActivity.class);
         startActivity(intent);
     }
 }

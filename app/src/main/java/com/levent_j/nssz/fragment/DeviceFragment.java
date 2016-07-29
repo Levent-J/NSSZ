@@ -4,12 +4,14 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -20,6 +22,7 @@ import com.levent_j.nssz.activity.MainActivity;
 import com.levent_j.nssz.adapter.DeviceAdapter;
 import com.levent_j.nssz.base.BaseFragment;
 import com.levent_j.nssz.entry.Device;
+import com.levent_j.nssz.utils.DeviceCheckUtil;
 import com.levent_j.nssz.utils.SpaceItemDecoration;
 
 import java.io.IOException;
@@ -108,24 +111,6 @@ public class DeviceFragment extends BaseFragment{
 
         //TODO:测试用填充假数据
         loadFakeData();
-
-        /**开启线程，每3秒发送一次数据*/
-//        Thread sendHandler = new Thread(){
-//            @Override
-//            public void run() {
-//                super.run();
-//                while (true){
-//                    sendMessage();
-//                    try {
-//                        sleep(3000);
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-//
-//            }
-//        };
-//        sendHandler.start();
     }
 
     private void loadFakeData() {
@@ -162,6 +147,8 @@ public class DeviceFragment extends BaseFragment{
         }
     };
 
+
+
     /**处理获取到的设备信息*/
     private Handler loadDateHandler = new Handler(){
         @Override
@@ -176,8 +163,8 @@ public class DeviceFragment extends BaseFragment{
             device.setHumidity(mDeviceDetail[4]);
 
             //判断一下是否存在
-            if (isExist(mDeviceDetail[1])){
-                int index = getIndex(mDeviceDetail[1]);
+            if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
+                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
                 deviceList.set(index,device);
             }else {
                 deviceList.add(device);
@@ -226,23 +213,23 @@ public class DeviceFragment extends BaseFragment{
     }
 
 
-    private int getIndex(int i) {
-        for (int j=0;j<deviceList.size();j++){
-            if (i==deviceList.get(j).getDeviceNumber()){
-                return j;
-            }
-        }
-        return 0;
-    }
+//    private int getIndex(int i) {
+//        for (int j=0;j<deviceList.size();j++){
+//            if (i==deviceList.get(j).getDeviceNumber()){
+//                return j;
+//            }
+//        }
+//        return 0;
+//    }
 
-    private boolean isExist(int name) {
-        for (Device d:deviceList){
-            if (d.getDeviceNumber()==name){
-                return true;
-            }
-        }
-        return false;
-    }
+//    private boolean isExist(int name) {
+//        for (Device d:deviceList){
+//            if (d.getDeviceNumber()==name){
+//                return true;
+//            }
+//        }
+//        return false;
+//    }
 
     public void sendMessage(){
         //TODO:这里可以换成我自己写死的发起请求的语句
@@ -263,19 +250,20 @@ public class DeviceFragment extends BaseFragment{
         try {
             mSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
         } catch (IOException e) {
-            Toa("链接失败！");
+            Log.e("Socket->get error",e.getMessage());
         }
         /**开始建立连接*/
         try {
             mSocket.connect();
-
         } catch (IOException e) {
-            Toa("链接断开！");
+            Log.e("Socket->connect error",e.getMessage());
+            showDialog();
             try {
                 mSocket.close();
                 mSocket = null;
             } catch (IOException e1) {
-                Toa("链接失败！");
+                Log.e("Socket->close error",e.getMessage());
+                showDialog();
             }
             return;
         }
@@ -283,9 +271,12 @@ public class DeviceFragment extends BaseFragment{
         try {
             inputStream = mSocket.getInputStream();
         } catch (IOException e) {
-            Toa("接收数据失败!");
+            showDialog();
             return;
         }
+
+        /**开启发送数据线程，每3秒发送一次数据*/
+        SendThread.start();
 
         if (!bThread){
             ReadThread.start();
@@ -293,7 +284,25 @@ public class DeviceFragment extends BaseFragment{
         }else {
             bRun = true;
         }
+
     }
+
+    /**发送数据的线程*/
+    private Thread SendThread = new Thread(){
+        @Override
+        public void run() {
+            super.run();
+            while (true){
+                sendMessage();
+                try {
+                    sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+    };
 
     /**接收数据线程*/
     private Thread ReadThread = new Thread(){
@@ -350,6 +359,28 @@ public class DeviceFragment extends BaseFragment{
             }
         }
     };
+
+    /**链接失败时弹出dialog*/
+    public void showDialog(){
+        new AlertDialog.Builder(getContext())
+                .setTitle("提示").setMessage("与蓝牙设备链接失败，是否重新链接？")
+                .setPositiveButton("是", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                        ConnectDevice(MainActivity.mDeviceMacAddress);
+                    }
+                })
+                .setNegativeButton("否", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        getActivity().finish();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
 
     @OnClick(R.id.fab)
     public void onClickCheckBtn(View view){

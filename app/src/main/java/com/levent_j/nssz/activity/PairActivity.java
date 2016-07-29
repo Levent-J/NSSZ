@@ -132,8 +132,7 @@ public class PairActivity extends BaseActivity{
             mDeviceMacAddress = address;
             /**将mac地址传给MainActivity*/
             MainActivity.mDeviceMacAddress = mDeviceMacAddress;
-            Intent intent = new Intent(PairActivity.this,LoginActivity.class);
-            startActivity(intent);
+            startActivity(new Intent(PairActivity.this,MainActivity.class));
         }
     };
 
