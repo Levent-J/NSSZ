@@ -2,10 +2,10 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
-        <item android:id="@+id/nav_main" android:icon="@android:drawable/ic_menu_camera"
-            android:title="首页" />
-        <item android:id="@+id/nav_about" android:icon="@android:drawable/ic_menu_gallery"
-            android:title="关于" />
+        <item android:id="@+id/nav_main" android:icon="@drawable/ic_nav_devices"
+            android:title="资产列表" />
+        <item android:id="@+id/nav_about" android:icon="@drawable/ic_nav_about"
+            android:title="关于我们" />
         <!--<item android:id="@+id/nav_slideshow" android:icon="@android:drawable/ic_menu_slideshow"-->
             <!--android:title="Slideshow" />-->
         <!--<item android:id="@+id/nav_manage" android:icon="@android:drawable/ic_menu_manage"-->

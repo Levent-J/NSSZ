@@ -40,9 +40,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     @Override
     public void onBindViewHolder(mViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        holder.Dname.setText("标签卡："+device.getDeviceNumber()+"号");
-        holder.Dt.setText("温度:"+device.getTemperature()+"."+device.getTemperatureDecimal()+"℃");
-        holder.Dw.setText("湿度:"+device.getHumidity()+"%");
+        holder.Dname.setText("标签卡编号："+device.getDeviceNumber()+"号");
+        holder.Dt.setText("当前温度:"+device.getTemperature()+"."+device.getTemperatureDecimal()+"℃");
+        holder.Dw.setText("当前湿度:"+device.getHumidity()+"%");
     }
 
     @Override

@@ -47,18 +47,18 @@ public class LoginActivity extends BaseActivity{
             passwordWraper.setErrorEnabled(false);
         }
 
-        if (!eUsername.equals("admin")){
-            usernameWraper.setError("用户名错误");
-            return;
-        }else {
-            usernameWraper.setErrorEnabled(false);
-        }
-        if (!ePassword.equals("admin")){
-            passwordWraper.setError("密码错误");
-            return;
-        }else {
-            passwordWraper.setErrorEnabled(false);
-        }
+//        if (!eUsername.equals("admin")){
+//            usernameWraper.setError("用户名错误");
+//            return;
+//        }else {
+//            usernameWraper.setErrorEnabled(false);
+//        }
+//        if (!ePassword.equals("123456")){
+//            passwordWraper.setError("密码错误");
+//            return;
+//        }else {
+//            passwordWraper.setErrorEnabled(false);
+//        }
 
         Intent intent = new Intent(LoginActivity.this,MainActivity.class);
         startActivity(intent);

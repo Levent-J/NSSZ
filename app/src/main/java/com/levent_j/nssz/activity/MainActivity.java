@@ -43,7 +43,7 @@ public class MainActivity extends BaseActivity
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fl_container, DeviceFragment.newInstance()).commit();
         current = R.id.nav_main;
-        setTitle("设备列表");
+        setTitle("资产列表");
         navigationView.setCheckedItem(R.id.nav_main);
 
         setSupportActionBar(toolbar);
@@ -101,14 +101,14 @@ public class MainActivity extends BaseActivity
         BaseFragment fragment = null;
         switch (select){
             case R.id.nav_main:
-                setTitle("设备列表");
+                setTitle("资产列表");
                 if (fragments[0]==null){
                     fragments[0] = DeviceFragment.newInstance();
                 }
                 fragment = fragments[0];
                 break;
             case R.id.nav_about:
-                setTitle("关于");
+                setTitle("关于我们");
                 if (fragments[1]==null){
                     fragments[1] = AboutFragment.newInstance();
                 }
