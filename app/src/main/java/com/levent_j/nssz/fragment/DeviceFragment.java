@@ -159,14 +159,14 @@ public class DeviceFragment extends BaseFragment{
 
             Device device = new Device();
             device.setState(mDeviceDetail[0]);
-            device.setDeviceNumber(mDeviceDetail[1]);
-            device.setTemperature(mDeviceDetail[2]);
-            device.setTemperatureDecimal(mDeviceDetail[3]);
-            device.setHumidity(mDeviceDetail[4]);
+            device.setDeviceNumber(mDeviceDetail[4]);
+            device.setTemperature(mDeviceDetail[1]);
+            device.setTemperatureDecimal(mDeviceDetail[2]);
+            device.setHumidity(mDeviceDetail[3]);
 
             //判断一下是否存在
-            if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
-                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
+            if (DeviceCheckUtil.isExist(mDeviceDetail[4],deviceList)){
+                int index = DeviceCheckUtil.getIndex(mDeviceDetail[4],deviceList);
                 deviceList.set(index,device);
             }else {
                 deviceList.add(device);
