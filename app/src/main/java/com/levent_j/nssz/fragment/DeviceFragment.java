@@ -54,8 +54,10 @@ public class DeviceFragment extends BaseFragment{
     private boolean isChecking = false;
 
     /**报警检测，温服、湿度*/
-    public static int Temperature = 100;
-    public static int Humidity = 100;
+    public static int TEMP_MAX = 100;
+    public static int TEMP_MIN = 0;
+    public static int HUM_MAX = 100;
+    public static int HUM_MIN = 0;
 
     /**振动器*/
     private Vibrator vibrator;
@@ -117,10 +119,10 @@ public class DeviceFragment extends BaseFragment{
         deviceList.clear();
         for (int i=0;i<5;i++){
             Device device = new Device();
-            device.setDeviceNumber(i);
+            device.setDeviceNumber(i+1);
             device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
             device.setTemperature((int) (25 + Math.random() * (30 - 25 + 1)));
-            device.setTemperatureDecimal((int) (0 + Math.random() * (100 - 0 + 1)));
+            device.setTemperatureDecimal((int) (0 + Math.random() * (10 - 0 + 1)));
             device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
             deviceList.add(device);
 //            Fakehandler.sendMessage(Fakehandler.obtainMessage());
@@ -192,21 +194,30 @@ public class DeviceFragment extends BaseFragment{
     private void checkDevices() {
         for (Device device:deviceList){
             //对报警限制做判断
-            if (device.getState()==3){
-                Toa("标签卡"+device.getDeviceNumber()+"受到了震动！！！");
-                vibrator.vibrate(2000);
-            }
-            if (device.getState()==4){
-                Toa("标签卡"+device.getDeviceNumber()+"被非法移动了！！！");
-                vibrator.vibrate(2000);
-            }
+            //TODO:测试方便，暂时注释了震动与移动检测
+//            if (device.getState()==3){
+//                Toa("标签卡"+device.getDeviceNumber()+"受到了震动！！！");
+//                vibrator.vibrate(2000);
+//            }
+//            if (device.getState()==4){
+//                Toa("标签卡"+device.getDeviceNumber()+"被非法移动了！！！");
+//                vibrator.vibrate(2000);
+//            }
             //温度湿度检测另算
-            if (device.getTemperature()>=Temperature){
-                Toa("标签卡"+device.getDeviceNumber()+"温度过高！！！");
+            if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
+                Toa("标签卡"+device.getDeviceNumber()+"温度过高！");
                 vibrator.vibrate(2000);
             }
-            if (device.getHumidity()>=Humidity){
-                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！！！");
+            if (device.getHumidity()>= HUM_MAX){
+                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！");
+                vibrator.vibrate(2000);
+            }
+            if ((device.getTemperature()+device.getTemperatureDecimal()/10)< TEMP_MIN){
+                Toa("标签卡"+device.getDeviceNumber()+"温度过低！");
+                vibrator.vibrate(2000);
+            }
+            if (device.getHumidity()< HUM_MIN){
+                Toa("标签卡"+device.getDeviceNumber()+"湿度过低！");
                 vibrator.vibrate(2000);
             }
         }

@@ -17,10 +17,14 @@ import butterknife.OnClick;
  */
 public class SetActivity extends BaseActivity{
 
-    @Bind(R.id.et_temperature)
-    EditText mTemperature;
-    @Bind(R.id.et_humidity)
-    EditText mHumidity;
+    @Bind(R.id.et_temperature_max)
+    EditText mTemperatureMax;
+    @Bind(R.id.et_humidity_max)
+    EditText mHumidityMax;
+    @Bind(R.id.et_temperature_min)
+    EditText mTemperatureMin;
+    @Bind(R.id.et_humidity_min)
+    EditText mHumidityMin;
     @Bind(R.id.btn_confirm)
     Button mConfirm;
 
@@ -32,8 +36,10 @@ public class SetActivity extends BaseActivity{
     @Override
     protected void init() {
         /**显示默认数值*/
-        mTemperature.setText(String.valueOf(DeviceFragment.Temperature));
-        mHumidity.setText(String.valueOf(DeviceFragment.Humidity));
+        mTemperatureMax.setText(String.valueOf(DeviceFragment.TEMP_MAX));
+        mHumidityMax.setText(String.valueOf(DeviceFragment.HUM_MAX));
+        mTemperatureMin.setText(String.valueOf(DeviceFragment.TEMP_MIN));
+        mHumidityMin.setText(String.valueOf(DeviceFragment.HUM_MIN));
     }
 
     @OnClick(R.id.btn_confirm)
@@ -41,14 +47,16 @@ public class SetActivity extends BaseActivity{
         mConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (TextUtils.isEmpty(mTemperature.getText())){
+                if (TextUtils.isEmpty(mTemperatureMax.getText())&&TextUtils.isEmpty(mTemperatureMin.getText())){
                     Toa("请填写正确温度");
-                }else if (TextUtils.isEmpty(mHumidity.getText())){
+                }else if (TextUtils.isEmpty(mHumidityMax.getText())&&TextUtils.isEmpty(mHumidityMin.getText())){
                     Toa("请填写正确湿度");
                 }else {
                     try {
-                        DeviceFragment.Temperature = Integer.parseInt(mTemperature.getText().toString().trim());
-                        DeviceFragment.Humidity = Integer.parseInt(mHumidity.getText().toString().trim());
+                        DeviceFragment.TEMP_MAX = Integer.parseInt(mTemperatureMax.getText().toString().trim());
+                        DeviceFragment.HUM_MAX = Integer.parseInt(mHumidityMax.getText().toString().trim());
+                        DeviceFragment.TEMP_MIN = Integer.parseInt(mTemperatureMin.getText().toString().trim());
+                        DeviceFragment.HUM_MIN = Integer.parseInt(mHumidityMin.getText().toString().trim());
                         finish();
                     }catch (NumberFormatException e){
                         Toa("请填写正确数值");

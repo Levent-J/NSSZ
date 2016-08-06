@@ -26,9 +26,29 @@
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="温度阀值"/>
+            android:text="温度最大值"/>
         <EditText
-            android:id="@+id/et_temperature"
+            android:id="@+id/et_temperature_max"
+            android:inputType="number"
+            android:layout_marginLeft="10dp"
+            android:hint="填入温度数值"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+        <TextView
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="温度最小值"/>
+        <EditText
+            android:id="@+id/et_temperature_min"
             android:inputType="number"
             android:layout_marginLeft="10dp"
             android:hint="填入温度数值"
@@ -47,9 +67,29 @@
             android:textSize="18sp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="湿度阀值"/>
+            android:text="湿度最大值"/>
         <EditText
-            android:id="@+id/et_humidity"
+            android:id="@+id/et_humidity_max"
+            android:inputType="number"
+            android:layout_marginLeft="10dp"
+            android:hint="填入湿度数值"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp"
+        android:layout_marginLeft="20dp"
+        android:layout_marginRight="20dp">
+        <TextView
+            android:textSize="18sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="湿度最小值"/>
+        <EditText
+            android:id="@+id/et_humidity_min"
             android:inputType="number"
             android:layout_marginLeft="10dp"
             android:hint="填入湿度数值"
