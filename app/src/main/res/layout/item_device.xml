@@ -9,14 +9,13 @@
     android:layout_marginBottom="8dp"
     android:background="@color/colorWhite"
     card_view:cardCornerRadius="0dp"
-    card_view:cardElevation="2dp">
+    card_view:cardElevation="8dp">
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="vertical" android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/colorPrimary">
         <TextView
             android:textColor="@color/colorWhite"
-            android:textStyle="bold"
             android:gravity="center"
             android:layout_weight="1"
             android:textSize="@dimen/text"

@@ -107,7 +107,7 @@ public class DeviceFragment extends BaseFragment{
         initCheckTask();
 
         //TODO:暂时以假数据测试，之后要去掉注释的
-        ConnectDevice(MainActivity.mDeviceMacAddress);
+//        ConnectDevice(MainActivity.mDeviceMacAddress);
 
         //TODO:测试用填充假数据
         loadFakeData();

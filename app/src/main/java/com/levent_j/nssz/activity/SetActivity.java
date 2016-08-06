@@ -31,6 +31,9 @@ public class SetActivity extends BaseActivity{
 
     @Override
     protected void init() {
+        /**显示默认数值*/
+        mTemperature.setText(String.valueOf(DeviceFragment.Temperature));
+        mHumidity.setText(String.valueOf(DeviceFragment.Humidity));
     }
 
     @OnClick(R.id.btn_confirm)

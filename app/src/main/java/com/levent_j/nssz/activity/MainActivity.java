@@ -60,6 +60,7 @@ public class MainActivity extends BaseActivity
             drawer.closeDrawer(GravityCompat.START);
         } else {
             //TODO:作退出的判断
+            super.onBackPressed();
         }
     }
 
