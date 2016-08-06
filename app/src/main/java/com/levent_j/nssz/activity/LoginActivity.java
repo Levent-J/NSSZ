@@ -31,7 +31,6 @@ public class LoginActivity extends BaseActivity{
 
     @OnClick(R.id.btn_login)
     public void onLogin(){
-        //TODO:管理员账号密码均为admin
         String eUsername = username.getText().toString().trim();
         String ePassword = password.toString().trim();
         if (TextUtils.isEmpty(eUsername)){
