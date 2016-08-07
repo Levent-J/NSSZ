@@ -4,7 +4,16 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <com.wang.avi.AVLoadingIndicatorView
+        android:layout_gravity="center"
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        app:indicatorName="BallScaleIndicator"
+        android:id="@+id/loading"
+        app:indicatorColor="@color/colorPrimary"
+        android:clipToPadding="false"/>
     <android.support.v7.widget.RecyclerView
+        android:visibility="gone"
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_width="match_parent"

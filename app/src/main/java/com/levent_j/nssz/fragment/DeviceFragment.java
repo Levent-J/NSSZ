@@ -3,11 +3,8 @@ package com.levent_j.nssz.fragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
 import android.content.DialogInterface;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
-import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -27,6 +24,7 @@ import com.levent_j.nssz.base.BaseFragment;
 import com.levent_j.nssz.entry.Device;
 import com.levent_j.nssz.utils.DeviceCheckUtil;
 import com.levent_j.nssz.utils.SpaceItemDecoration;
+import com.wang.avi.AVLoadingIndicatorView;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,6 +44,7 @@ import butterknife.OnClick;
 public class DeviceFragment extends BaseFragment{
     @Bind(R.id.fab) FloatingActionButton fab;
     @Bind(R.id.rv_devices) RecyclerView recyclerView;
+    @Bind(R.id.loading) AVLoadingIndicatorView loading;
 
     /**设备列表*/
     private DeviceAdapter deviceAdapter;
@@ -99,9 +98,8 @@ public class DeviceFragment extends BaseFragment{
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         /**开启振动*/
-        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-        getActivity().getSystemService(Context.VIBRATOR_SERVICE);
-
+//        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+//        getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         deviceList = new ArrayList<>();
 
         /**实例化adapter与list*/
@@ -111,15 +109,33 @@ public class DeviceFragment extends BaseFragment{
         recyclerView.addItemDecoration(new SpaceItemDecoration(getResources().getDimensionPixelSize(R.dimen.space)));
         recyclerView.setAdapter(deviceAdapter);
 
+        recyclerView.setVisibility(View.GONE);
+        loading.setVisibility(View.VISIBLE);
+
         /**初始化检测设备的task*/
         initCheckTask();
 
         //TODO:暂时以假数据测试，之后要去掉注释的
+
+        startConnectThread();
 //        ConnectDevice(MainActivity.mDeviceMacAddress);
 
         //TODO:测试用填充假数据
-        loadFakeData();
+//        loadFakeData();
     }
+
+    private void startConnectThread(){
+        Thread connectThread = new Thread(){
+            @Override
+            public void run() {
+                super.run();
+                ConnectDevice(MainActivity.mDeviceMacAddress);
+            }
+        };
+        connectThread.start();
+    }
+
+
 
     private void loadFakeData() {
         deviceList.clear();
@@ -138,8 +154,16 @@ public class DeviceFragment extends BaseFragment{
     private Handler checkHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-            checkDevices();
             super.handleMessage(msg);
+            checkDevices();
+        }
+    };
+
+    private Handler dialogHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            showDialog();
         }
     };
 
@@ -165,6 +189,9 @@ public class DeviceFragment extends BaseFragment{
             }
 
             deviceAdapter.updateDeviceList(deviceList);
+
+            loading.setVisibility(View.GONE);
+            recyclerView.setVisibility(View.VISIBLE);
 //            recyclerView.setAdapter(deviceAdapter);
         }
     };
@@ -235,6 +262,7 @@ public class DeviceFragment extends BaseFragment{
     public void ConnectDevice(String address) {
         /**通过mac地址得到设备*/
         mDevice = mBtAdapter.getRemoteDevice(address);
+        Log.e("MacAddress",MainActivity.mDeviceMacAddress);
         /**用UUID得到socket*/
         try {
             mSocket = mDevice.createRfcommSocketToServiceRecord(UUID.fromString(MY_UUID));
@@ -246,13 +274,15 @@ public class DeviceFragment extends BaseFragment{
             mSocket.connect();
         } catch (IOException e) {
             Log.e("Socket->connect error",e.getMessage());
-            showDialog();
+//            showDialog();
+            dialogHandler.sendMessage(dialogHandler.obtainMessage());
             try {
                 mSocket.close();
                 mSocket = null;
             } catch (IOException e1) {
                 Log.e("Socket->close error",e.getMessage());
-                showDialog();
+//                showDialog();
+                dialogHandler.sendMessage(dialogHandler.obtainMessage());
             }
             return;
         }
@@ -260,7 +290,8 @@ public class DeviceFragment extends BaseFragment{
         try {
             inputStream = mSocket.getInputStream();
         } catch (IOException e) {
-            showDialog();
+//            showDialog();
+            dialogHandler.sendMessage(dialogHandler.obtainMessage());
             return;
         }
 
@@ -357,7 +388,10 @@ public class DeviceFragment extends BaseFragment{
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
-                        ConnectDevice(MainActivity.mDeviceMacAddress);
+                        loading.setVisibility(View.VISIBLE);
+                        recyclerView.setVisibility(View.GONE);
+                        startConnectThread();
+//                        ConnectDevice(MainActivity.mDeviceMacAddress);
                     }
                 })
                 .setNegativeButton("否", new DialogInterface.OnClickListener() {
