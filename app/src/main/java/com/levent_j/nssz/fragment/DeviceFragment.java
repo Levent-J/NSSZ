@@ -53,6 +53,9 @@ public class DeviceFragment extends BaseFragment{
     private TimerTask timerTask;
     private boolean isChecking = false;
 
+    /**检测时间间隔*/
+    private static int CHECK_DELAY = 1000;
+
     /**报警检测，温服、湿度*/
     public static int TEMP_MAX = 100;
     public static int TEMP_MIN = 0;
@@ -66,7 +69,7 @@ public class DeviceFragment extends BaseFragment{
     private InputStream inputStream;
 
     /**蓝牙串口uuid*/
-    private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";   //SPP服务UUID号
+    private final static String MY_UUID = "00001101-0000-1000-8000-00805F9B34FB";//SPP服务UUID号
 
     /**蓝牙设备及socket*/
     private BluetoothDevice mDevice;
@@ -117,7 +120,7 @@ public class DeviceFragment extends BaseFragment{
 
     private void loadFakeData() {
         deviceList.clear();
-        for (int i=0;i<5;i++){
+        for (int i=0;i<3;i++){
             Device device = new Device();
             device.setDeviceNumber(i+1);
             device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
@@ -125,21 +128,9 @@ public class DeviceFragment extends BaseFragment{
             device.setTemperatureDecimal((int) (0 + Math.random() * (10 - 0 + 1)));
             device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
             deviceList.add(device);
-//            Fakehandler.sendMessage(Fakehandler.obtainMessage());
         }
         deviceAdapter.updateDeviceList(deviceList);
-        recyclerView.setAdapter(deviceAdapter);
-
     }
-
-    private Handler Fakehandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            deviceAdapter.updateDeviceList(deviceList);
-            recyclerView.setAdapter(deviceAdapter);
-        }
-    };
 
     private Handler checkHandler = new Handler(){
         @Override
@@ -148,8 +139,6 @@ public class DeviceFragment extends BaseFragment{
             super.handleMessage(msg);
         }
     };
-
-
 
     /**处理获取到的设备信息*/
     private Handler loadDateHandler = new Handler(){
@@ -173,14 +162,13 @@ public class DeviceFragment extends BaseFragment{
             }
 
             deviceAdapter.updateDeviceList(deviceList);
-            recyclerView.setAdapter(deviceAdapter);
+//            recyclerView.setAdapter(deviceAdapter);
         }
     };
 
 
     private void initCheckTask(){
         timer = new Timer();
-
         timerTask = new TimerTask() {
             @Override
             public void run() {
@@ -205,42 +193,27 @@ public class DeviceFragment extends BaseFragment{
 //            }
             //温度湿度检测另算
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
-                Toa("标签卡"+device.getDeviceNumber()+"温度过高！");
+                showDialog("标签卡"+device.getDeviceNumber()+"温度过高！");
+//                Toa("标签卡"+device.getDeviceNumber()+"温度过高！");
                 vibrator.vibrate(2000);
             }
             if (device.getHumidity()>= HUM_MAX){
-                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！");
+                showDialog("标签卡"+device.getDeviceNumber()+"湿度过高！");
+//                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！");
                 vibrator.vibrate(2000);
             }
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)< TEMP_MIN){
-                Toa("标签卡"+device.getDeviceNumber()+"温度过低！");
+                showDialog("标签卡"+device.getDeviceNumber()+"温度过低！");
+//                Toa("标签卡"+device.getDeviceNumber()+"温度过低！");
                 vibrator.vibrate(2000);
             }
             if (device.getHumidity()< HUM_MIN){
-                Toa("标签卡"+device.getDeviceNumber()+"湿度过低！");
+                showDialog("标签卡"+device.getDeviceNumber()+"湿度过低！");
+//                Toa("标签卡"+device.getDeviceNumber()+"湿度过低！");
                 vibrator.vibrate(2000);
             }
         }
     }
-
-
-//    private int getIndex(int i) {
-//        for (int j=0;j<deviceList.size();j++){
-//            if (i==deviceList.get(j).getDeviceNumber()){
-//                return j;
-//            }
-//        }
-//        return 0;
-//    }
-
-//    private boolean isExist(int name) {
-//        for (Device d:deviceList){
-//            if (d.getDeviceNumber()==name){
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
 
     public void sendMessage(){
         //TODO:这里可以换成我自己写死的发起请求的语句
@@ -392,6 +365,19 @@ public class DeviceFragment extends BaseFragment{
                 .show();
     }
 
+    public void showDialog(String s){
+        new AlertDialog.Builder(getContext())
+                .setTitle("警告").setMessage(s)
+                .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                })
+                .setCancelable(false)
+                .show();
+    }
+
 
     @OnClick(R.id.fab)
     public void onClickCheckBtn(View view){
@@ -414,6 +400,8 @@ public class DeviceFragment extends BaseFragment{
     @Override
     public void onDestroy() {
         super.onDestroy();
+        /**清理不用的handler,优化内存*/
         checkHandler.removeCallbacksAndMessages(null);
+        loadDateHandler.removeCallbacksAndMessages(null);
     }
 }

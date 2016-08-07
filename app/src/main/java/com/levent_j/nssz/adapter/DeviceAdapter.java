@@ -40,9 +40,9 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
     @Override
     public void onBindViewHolder(mViewHolder holder, int position) {
         Device device = deviceList.get(position);
-        holder.Dname.setText("标签卡编号："+device.getDeviceNumber()+"号");
-        holder.Dt.setText("当前温度:"+device.getTemperature()+"."+device.getTemperatureDecimal()+"℃");
-        holder.Dw.setText("当前湿度:"+device.getHumidity()+"%");
+        holder.dName.setText("标签卡编号："+device.getDeviceNumber()+"号");
+        holder.dTemp.setText("当前温度:"+device.getTemperature()+"."+device.getTemperatureDecimal()+"℃");
+        holder.dHum.setText("当前湿度:"+device.getHumidity()+"%");
     }
 
     @Override
@@ -58,11 +58,11 @@ public class DeviceAdapter extends RecyclerView.Adapter<DeviceAdapter.mViewHolde
 
     class mViewHolder extends RecyclerView.ViewHolder{
         @Bind(R.id.tv_device_name)
-        TextView Dname;
+        TextView dName;
         @Bind(R.id.tv_device_t)
-        TextView Dt;
+        TextView dTemp;
         @Bind(R.id.tv_device_w)
-        TextView Dw;
+        TextView dHum;
 
         public mViewHolder(View itemView) {
             super(itemView);
