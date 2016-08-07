@@ -116,7 +116,6 @@ public class DeviceFragment extends BaseFragment{
         initCheckTask();
 
         //TODO:暂时以假数据测试，之后要去掉注释的
-
         startConnectThread();
 //        ConnectDevice(MainActivity.mDeviceMacAddress);
 
@@ -173,19 +172,31 @@ public class DeviceFragment extends BaseFragment{
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-            Device device = new Device();
-            device.setState(mDeviceDetail[0]);
-            device.setDeviceNumber(mDeviceDetail[4]);
-            device.setTemperature(mDeviceDetail[1]);
-            device.setTemperatureDecimal(mDeviceDetail[2]);
-            device.setHumidity(mDeviceDetail[3]);
-
-            //判断一下是否存在
-            if (DeviceCheckUtil.isExist(mDeviceDetail[4],deviceList)){
-                int index = DeviceCheckUtil.getIndex(mDeviceDetail[4],deviceList);
+            if (mDeviceDetail[0]==2){
+                //温度湿度
+                Device device = new Device();
+                device.setState(mDeviceDetail[0]);
+                device.setDeviceNumber(mDeviceDetail[4]);
+                device.setTemperature(mDeviceDetail[1]);
+                device.setTemperatureDecimal(mDeviceDetail[2]);
+                device.setHumidity(mDeviceDetail[3]);
+                //判断一下是否存在
+                if (DeviceCheckUtil.isExist(mDeviceDetail[4],deviceList)){
+                    int index = DeviceCheckUtil.getIndex(mDeviceDetail[4],deviceList);
+                    deviceList.set(index,device);
+                }else {
+                    deviceList.add(device);
+                }
+            }else if (mDeviceDetail[0]==3){
+                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
+                Device device = deviceList.get(index);
+                device.setState(3);
                 deviceList.set(index,device);
             }else {
-                deviceList.add(device);
+                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
+                Device device = deviceList.get(index);
+                device.setState(4);
+                deviceList.set(index,device);
             }
 
             deviceAdapter.updateDeviceList(deviceList);
@@ -214,15 +225,16 @@ public class DeviceFragment extends BaseFragment{
 
 
             //对报警限制做判断
-            //TODO:测试方便，暂时注释了震动与移动检测
-//            if (device.getState()==3){
+            if (device.getState()==3){
+                showDialog("标签卡"+device.getDeviceNumber()+"受到了震动！");
 //                Toa("标签卡"+device.getDeviceNumber()+"受到了震动！！！");
 //                vibrator.vibrate(2000);
-//            }
-//            if (device.getState()==4){
+            }
+            if (device.getState()==4){
+                showDialog("标签卡"+device.getDeviceNumber()+"被非法移动了！");
 //                Toa("标签卡"+device.getDeviceNumber()+"被非法移动了！！！");
 //                vibrator.vibrate(2000);
-//            }
+            }
             //温度湿度检测另算
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过高！");
