@@ -5,6 +5,9 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -181,6 +184,8 @@ public class DeviceFragment extends BaseFragment{
 
     private void checkDevices() {
         for (Device device:deviceList){
+
+
             //对报警限制做判断
             //TODO:测试方便，暂时注释了震动与移动检测
 //            if (device.getState()==3){
@@ -195,22 +200,22 @@ public class DeviceFragment extends BaseFragment{
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过高！");
 //                Toa("标签卡"+device.getDeviceNumber()+"温度过高！");
-                vibrator.vibrate(2000);
+//                vibrator.vibrate(2000);
             }
             if (device.getHumidity()>= HUM_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过高！");
 //                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！");
-                vibrator.vibrate(2000);
+//                vibrator.vibrate(2000);
             }
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)< TEMP_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过低！");
 //                Toa("标签卡"+device.getDeviceNumber()+"温度过低！");
-                vibrator.vibrate(2000);
+//                vibrator.vibrate(2000);
             }
             if (device.getHumidity()< HUM_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过低！");
 //                Toa("标签卡"+device.getDeviceNumber()+"湿度过低！");
-                vibrator.vibrate(2000);
+//                vibrator.vibrate(2000);
             }
         }
     }
@@ -366,6 +371,7 @@ public class DeviceFragment extends BaseFragment{
     }
 
     public void showDialog(String s){
+        startMusic();
         new AlertDialog.Builder(getContext())
                 .setTitle("警告").setMessage(s)
                 .setPositiveButton("知道了", new DialogInterface.OnClickListener() {
@@ -378,9 +384,17 @@ public class DeviceFragment extends BaseFragment{
                 .show();
     }
 
+    /***/
+    public void startMusic(){
+        MediaPlayer mediaPlayer;
+        mediaPlayer = MediaPlayer.create(getContext(),R.raw.bao);
+        mediaPlayer.start();
+    }
+
 
     @OnClick(R.id.fab)
     public void onClickCheckBtn(View view){
+
         if (!isChecking){
             Snackbar.make(view,"开启检测",Snackbar.LENGTH_SHORT).show();
 
