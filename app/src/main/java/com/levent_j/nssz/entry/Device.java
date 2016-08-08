@@ -12,6 +12,14 @@ public class Device {
     private int humidity;
     private int state;
 
+    public Device(){
+        this.deviceNumber=1;
+        this.Temperature=0;
+        this.temperatureDecimal=0;
+        this.humidity=0;
+        this.state=0;
+    }
+
     public int getDeviceNumber() {
         return deviceNumber;
     }

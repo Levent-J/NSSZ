@@ -59,8 +59,7 @@ public class MainActivity extends BaseActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            //TODO:作退出的判断
-            super.onBackPressed();
+//            super.onBackPressed();
         }
     }
 
@@ -102,23 +101,28 @@ public class MainActivity extends BaseActivity
         BaseFragment fragment = null;
         switch (select){
             case R.id.nav_main:
-                setTitle("资产列表");
-                if (fragments[0]==null){
-                    fragments[0] = DeviceFragment.newInstance();
-                }
-                fragment = fragments[0];
+                setTitle("设备列表");
+//                if (fragments[0]==null){
+//                    fragments[0] = DeviceFragment.newInstance();
+//                }
+//                fragment = fragments[0];
+                fragment = DeviceFragment.newInstance();
                 break;
             case R.id.nav_about:
                 setTitle("关于我们");
-                if (fragments[1]==null){
-                    fragments[1] = AboutFragment.newInstance();
-                }
-                fragment = fragments[1];
+//                if (fragments[1]==null){
+//                    fragments[1] = AboutFragment.newInstance();
+//                }
+//                fragment = fragments[1];
+                fragment = AboutFragment.newInstance();
                 break;
         }
 
+        fragmentManager.popBackStack();
         fragmentManager.beginTransaction().replace(R.id.fl_container,fragment).commit();
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
+
+
 }

@@ -238,7 +238,10 @@ public class DeviceFragment extends BaseFragment{
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            showDialog("标签卡1异常!");
+            if (isChecking){
+                showDialog("标签卡1异常!");
+                closeCheck();
+            }
         }
     };
 
@@ -246,7 +249,11 @@ public class DeviceFragment extends BaseFragment{
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            showDialog("标签卡2异常!");
+            if (isChecking){
+                showDialog("标签卡2异常!");
+                closeCheck();
+            }
+
         }
     };
 
@@ -254,7 +261,11 @@ public class DeviceFragment extends BaseFragment{
         @Override
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
-            showDialog("标签卡3异常!");
+            if (isChecking){
+                showDialog("标签卡3异常!");
+                closeCheck();
+            }
+
         }
     };
 
@@ -287,8 +298,6 @@ public class DeviceFragment extends BaseFragment{
                 if (isChecking){
                     //根据标签卡号取消检测超时任务
                     cancelTimerByNum(mDeviceDetail[4]);
-                    //进行下一次检测
-                    startOvertimeListener(mDeviceDetail[4]);
                 }
 
                 //温度湿度
@@ -312,14 +321,20 @@ public class DeviceFragment extends BaseFragment{
                 if (isChecking){
                     //根据标签卡号取消检测超时任务
                     cancelTimerByNum(mDeviceDetail[1]);
-                    //进行下一次检测
-                    startOvertimeListener(mDeviceDetail[1]);
                 }
 
-                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
-                Device device = deviceList.get(index);
-                device.setState(3);
-                deviceList.set(index,device);
+                if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
+                    int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
+                    Device device = deviceList.get(index);
+                    device.setState(3);
+                    deviceList.set(index,device);
+                }else {
+                    Device device = new Device();
+                    device.setDeviceNumber(mDeviceDetail[1]);
+                    device.setState(3);
+                    deviceList.add(device);
+                }
+
             }else {
 
                 setExist(mDeviceDetail[1]);
@@ -327,14 +342,19 @@ public class DeviceFragment extends BaseFragment{
                 if (isChecking){
                     //根据标签卡号取消检测超时任务
                     cancelTimerByNum(mDeviceDetail[1]);
-                    //进行下一次检测
-                    startOvertimeListener(mDeviceDetail[1]);
                 }
 
-                int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
-                Device device = deviceList.get(index);
-                device.setState(4);
-                deviceList.set(index,device);
+                if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
+                    int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
+                    Device device = deviceList.get(index);
+                    device.setState(4);
+                    deviceList.set(index,device);
+                }else {
+                    Device device = new Device();
+                    device.setDeviceNumber(mDeviceDetail[1]);
+                    device.setState(4);
+                    deviceList.add(device);
+                }
             }
 
             deviceAdapter.updateDeviceList(deviceList);
@@ -357,6 +377,7 @@ public class DeviceFragment extends BaseFragment{
 
     private void cancelTimerByNum(int id){
         //根据标签卡号取消检测超时任务
+
         if (id==1){
             overTimer1.cancel();
         }else if (id==2){
@@ -364,6 +385,8 @@ public class DeviceFragment extends BaseFragment{
         }else {
             overTimer3.cancel();
         }
+        //进行下一次检测
+        startOvertimeListener(id);
     }
 
     private void initCheckTask(){
@@ -385,10 +408,12 @@ public class DeviceFragment extends BaseFragment{
             if (device.getState()==3){
                 showDialog("标签卡"+device.getDeviceNumber()+"受到了震动！");
                 closeCheck();
+                reventState(device.getDeviceNumber());
             }
             if (device.getState()==4){
                 showDialog("标签卡"+device.getDeviceNumber()+"被非法移动了！");
                 closeCheck();
+                reventState(device.getDeviceNumber());
             }
             //温度湿度检测另算
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
@@ -409,6 +434,14 @@ public class DeviceFragment extends BaseFragment{
             }
         }
     }
+
+    private void reventState(int id){
+        int index = DeviceCheckUtil.getIndex(id,deviceList);
+        Device device = deviceList.get(index);
+        device.setState(2);
+        deviceList.set(index,device);
+    }
+
     private void closeCheck(){
         timerTask.cancel();
         initCheckTask();
@@ -558,7 +591,6 @@ public class DeviceFragment extends BaseFragment{
                         loading.setVisibility(View.VISIBLE);
                         recyclerView.setVisibility(View.GONE);
                         startConnectThread();
-//                        ConnectDevice(MainActivity.mDeviceMacAddress);
                     }
                 })
                 .setNegativeButton("否", new DialogInterface.OnClickListener() {
@@ -612,15 +644,6 @@ public class DeviceFragment extends BaseFragment{
             if (isExist3){
                 startOvertimeListener(3);
             }
-
-
-//            for (int i=0;i<deviceList.size();i++){
-//                startOvertimeListener(deviceList.get(i).getDeviceNumber());
-//                if (deviceList.get(i).getDeviceNumber()==1){
-//
-//                }
-//            }
-//
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
             initCheckTask();
             timer.scheduleAtFixedRate(timerTask, 1000, 2000);
@@ -639,8 +662,6 @@ public class DeviceFragment extends BaseFragment{
     @Override
     public void onDestroy() {
         super.onDestroy();
-        /**清理不用的handler,优化内存*/
-        checkHandler.removeCallbacksAndMessages(null);
-        loadDateHandler.removeCallbacksAndMessages(null);
+//        xc
     }
 }
