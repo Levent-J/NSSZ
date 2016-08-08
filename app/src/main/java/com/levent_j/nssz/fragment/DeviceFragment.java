@@ -55,14 +55,29 @@ public class DeviceFragment extends BaseFragment{
     private TimerTask timerTask;
     private boolean isChecking = false;
 
-    /**检测时间间隔*/
-    private static int CHECK_DELAY = 1000;
+    private Timer overTimer1;
+    private TimerTask overTimeTask1;
+    private Timer overTimer2;
+    private TimerTask overTimeTask2;
+    private Timer overTimer3;
+    private TimerTask overTimeTask3;
+
+    /**超时检测时间间隔*/
+    private static int OVER_TIME_DELAY = 40000;
+
+    /**判断三个标签卡是否存在*/
+    private boolean isExist1 = false;
+    private boolean isExist2 = false;
+    private boolean isExist3 = false;
 
     /**报警检测，温服、湿度*/
     public static int TEMP_MAX = 100;
     public static int TEMP_MIN = 0;
     public static int HUM_MAX = 100;
     public static int HUM_MIN = 0;
+
+    /**报警声播放器*/
+    private MediaPlayer mediaPlayer;
 
     /**振动器*/
     private Vibrator vibrator;
@@ -98,6 +113,7 @@ public class DeviceFragment extends BaseFragment{
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         /**开启振动*/
+        mediaPlayer = MediaPlayer.create(getContext(),R.raw.bao);
 //        vibrator = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
 //        getActivity().getSystemService(Context.VIBRATOR_SERVICE);
         deviceList = new ArrayList<>();
@@ -117,10 +133,24 @@ public class DeviceFragment extends BaseFragment{
 
         //TODO:暂时以假数据测试，之后要去掉注释的
         startConnectThread();
-//        ConnectDevice(MainActivity.mDeviceMacAddress);
 
         //TODO:测试用填充假数据
-//        loadFakeData();
+//        Thread fake = new Thread(){
+//            @Override
+//            public void run() {
+//                super.run();
+//                startOvertimeListener();
+//                while (true){
+//                    fakeHandler.sendMessage(fakeHandler.obtainMessage());
+//                    try {
+//                        sleep(3000);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//            }
+//        };
+//        fake.start();
     }
 
     private void startConnectThread(){
@@ -134,9 +164,20 @@ public class DeviceFragment extends BaseFragment{
         connectThread.start();
     }
 
-
+    private Handler fakeHandler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            loadFakeData();
+        }
+    };
 
     private void loadFakeData() {
+
+        overTimeTask1.cancel();
+
+        loading.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
         deviceList.clear();
         for (int i=0;i<3;i++){
             Device device = new Device();
@@ -148,7 +189,74 @@ public class DeviceFragment extends BaseFragment{
             deviceList.add(device);
         }
         deviceAdapter.updateDeviceList(deviceList);
+
+        startOvertimeListener(1);
+        startOvertimeListener(2);
+        startOvertimeListener(3);
+
     }
+
+    private void startOvertimeListener(int id) {
+        switch (id){
+            case 1:
+                overTimer1 = new Timer();
+                overTimeTask1 = new TimerTask() {
+                    @Override
+                    public void run() {
+                        overTimer1.cancel();
+                        overTimeHandler1.sendMessage(overTimeHandler1.obtainMessage());
+                    }
+                };
+                overTimer1.schedule(overTimeTask1,OVER_TIME_DELAY);
+                break;
+            case 2:
+                overTimer2 = new Timer();
+                overTimeTask2 = new TimerTask() {
+                    @Override
+                    public void run() {
+                        overTimer2.cancel();
+                        overTimeHandler2.sendMessage(overTimeHandler1.obtainMessage());
+                    }
+                };
+                overTimer2.schedule(overTimeTask2,OVER_TIME_DELAY);
+                break;
+            case 3:
+                overTimer3 = new Timer();
+                overTimeTask3 = new TimerTask() {
+                    @Override
+                    public void run() {
+                        overTimer3.cancel();
+                        overTimeHandler3.sendMessage(overTimeHandler1.obtainMessage());
+                    }
+                };
+                overTimer3.schedule(overTimeTask3,OVER_TIME_DELAY);
+                break;
+        }
+    }
+
+    private Handler overTimeHandler1 = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            showDialog("标签卡1异常!");
+        }
+    };
+
+    private Handler overTimeHandler2 = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            showDialog("标签卡2异常!");
+        }
+    };
+
+    private Handler overTimeHandler3 = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            showDialog("标签卡3异常!");
+        }
+    };
 
     private Handler checkHandler = new Handler(){
         @Override
@@ -173,6 +281,16 @@ public class DeviceFragment extends BaseFragment{
             super.handleMessage(msg);
 
             if (mDeviceDetail[0]==2){
+
+                setExist(mDeviceDetail[4]);
+
+                if (isChecking){
+                    //根据标签卡号取消检测超时任务
+                    cancelTimerByNum(mDeviceDetail[4]);
+                    //进行下一次检测
+                    startOvertimeListener(mDeviceDetail[4]);
+                }
+
                 //温度湿度
                 Device device = new Device();
                 device.setState(mDeviceDetail[0]);
@@ -188,11 +306,31 @@ public class DeviceFragment extends BaseFragment{
                     deviceList.add(device);
                 }
             }else if (mDeviceDetail[0]==3){
+
+                setExist(mDeviceDetail[1]);
+
+                if (isChecking){
+                    //根据标签卡号取消检测超时任务
+                    cancelTimerByNum(mDeviceDetail[1]);
+                    //进行下一次检测
+                    startOvertimeListener(mDeviceDetail[1]);
+                }
+
                 int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
                 Device device = deviceList.get(index);
                 device.setState(3);
                 deviceList.set(index,device);
             }else {
+
+                setExist(mDeviceDetail[1]);
+
+                if (isChecking){
+                    //根据标签卡号取消检测超时任务
+                    cancelTimerByNum(mDeviceDetail[1]);
+                    //进行下一次检测
+                    startOvertimeListener(mDeviceDetail[1]);
+                }
+
                 int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
                 Device device = deviceList.get(index);
                 device.setState(4);
@@ -203,10 +341,30 @@ public class DeviceFragment extends BaseFragment{
 
             loading.setVisibility(View.GONE);
             recyclerView.setVisibility(View.VISIBLE);
-//            recyclerView.setAdapter(deviceAdapter);
+
         }
     };
 
+    private void setExist(int id){
+        if (id==1){
+            isExist1=true;
+        }else if (id==2){
+            isExist2=true;
+        }else {
+            isExist3=true;
+        }
+    }
+
+    private void cancelTimerByNum(int id){
+        //根据标签卡号取消检测超时任务
+        if (id==1){
+            overTimer1.cancel();
+        }else if (id==2){
+            overTimer2.cancel();
+        }else {
+            overTimer3.cancel();
+        }
+    }
 
     private void initCheckTask(){
         timer = new Timer();
@@ -223,40 +381,39 @@ public class DeviceFragment extends BaseFragment{
     private void checkDevices() {
         for (Device device:deviceList){
 
-
             //对报警限制做判断
             if (device.getState()==3){
                 showDialog("标签卡"+device.getDeviceNumber()+"受到了震动！");
-//                Toa("标签卡"+device.getDeviceNumber()+"受到了震动！！！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
             if (device.getState()==4){
                 showDialog("标签卡"+device.getDeviceNumber()+"被非法移动了！");
-//                Toa("标签卡"+device.getDeviceNumber()+"被非法移动了！！！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
             //温度湿度检测另算
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过高！");
-//                Toa("标签卡"+device.getDeviceNumber()+"温度过高！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
             if (device.getHumidity()>= HUM_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过高！");
-//                Toa("标签卡"+device.getDeviceNumber()+"湿度过高！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
-            if ((device.getTemperature()+device.getTemperatureDecimal()/10)< TEMP_MIN){
+            if ((device.getTemperature()+device.getTemperatureDecimal()/10)<= TEMP_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过低！");
-//                Toa("标签卡"+device.getDeviceNumber()+"温度过低！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
-            if (device.getHumidity()< HUM_MIN){
+            if (device.getHumidity()<= HUM_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过低！");
-//                Toa("标签卡"+device.getDeviceNumber()+"湿度过低！");
-//                vibrator.vibrate(2000);
+                closeCheck();
             }
         }
+    }
+    private void closeCheck(){
+        timerTask.cancel();
+        initCheckTask();
+        fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
+        isChecking = false;
     }
 
     public void sendMessage(){
@@ -268,6 +425,7 @@ public class DeviceFragment extends BaseFragment{
             byte[] bos = s.getBytes();
             os.write(bos);
         }catch(IOException e){
+
         }
     }
 
@@ -286,14 +444,12 @@ public class DeviceFragment extends BaseFragment{
             mSocket.connect();
         } catch (IOException e) {
             Log.e("Socket->connect error",e.getMessage());
-//            showDialog();
             dialogHandler.sendMessage(dialogHandler.obtainMessage());
             try {
                 mSocket.close();
                 mSocket = null;
             } catch (IOException e1) {
                 Log.e("Socket->close error",e.getMessage());
-//                showDialog();
                 dialogHandler.sendMessage(dialogHandler.obtainMessage());
             }
             return;
@@ -302,7 +458,6 @@ public class DeviceFragment extends BaseFragment{
         try {
             inputStream = mSocket.getInputStream();
         } catch (IOException e) {
-//            showDialog();
             dialogHandler.sendMessage(dialogHandler.obtainMessage());
             return;
         }
@@ -424,17 +579,21 @@ public class DeviceFragment extends BaseFragment{
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         dialog.dismiss();
+                        stopMusic();
                     }
                 })
                 .setCancelable(false)
                 .show();
     }
 
-    /***/
+    /**播放警报声*/
     public void startMusic(){
-        MediaPlayer mediaPlayer;
-        mediaPlayer = MediaPlayer.create(getContext(),R.raw.bao);
+        mediaPlayer.seekTo(0);
         mediaPlayer.start();
+    }
+
+    public void stopMusic(){
+        mediaPlayer.pause();
     }
 
 
@@ -444,12 +603,32 @@ public class DeviceFragment extends BaseFragment{
         if (!isChecking){
             Snackbar.make(view,"开启检测",Snackbar.LENGTH_SHORT).show();
 
+            if (isExist1){
+                startOvertimeListener(1);
+            }
+            if (isExist2){
+                startOvertimeListener(2);
+            }
+            if (isExist3){
+                startOvertimeListener(3);
+            }
+
+
+//            for (int i=0;i<deviceList.size();i++){
+//                startOvertimeListener(deviceList.get(i).getDeviceNumber());
+//                if (deviceList.get(i).getDeviceNumber()==1){
+//
+//                }
+//            }
+//
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
             initCheckTask();
-            timer.scheduleAtFixedRate(timerTask, 1000, 10000);
+            timer.scheduleAtFixedRate(timerTask, 1000, 2000);
             isChecking = true;
         }else {
             Snackbar.make(view,"关闭检测",Snackbar.LENGTH_SHORT).show();
+
+
 
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
             timer.cancel();
