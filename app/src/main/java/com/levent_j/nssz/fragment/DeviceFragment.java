@@ -137,10 +137,8 @@ public class DeviceFragment extends BaseFragment{
         /**初始化检测设备的task*/
         initCheckTask();
 
-        //TODO:暂时以假数据测试，之后要去掉注释的
         startConnectThread();
 
-        //TODO:测试用填充假数据
 //        Thread fake = new Thread(){
 //            @Override
 //            public void run() {
@@ -450,18 +448,17 @@ public class DeviceFragment extends BaseFragment{
         deviceList.set(index,device);
     }
 
-    public void sendMessage(){
-        //TODO:这里可以换成我自己写死的发起请求的语句
-        try{
-            OutputStream os = mSocket.getOutputStream();   //蓝牙连接输出流
-            //要发送的数据
-            String s = "12345";
-            byte[] bos = s.getBytes();
-            os.write(bos);
-        }catch(IOException e){
-
-        }
-    }
+//    public void sendMessage(){
+//        try{
+//            OutputStream os = mSocket.getOutputStream();   //蓝牙连接输出流
+//            //要发送的数据
+//            String s = "12345";
+//            byte[] bos = s.getBytes();
+//            os.write(bos);
+//        }catch(IOException e){
+//
+//        }
+//    }
 
     public void ConnectDevice(String address) {
         /**通过mac地址得到设备*/
@@ -494,9 +491,6 @@ public class DeviceFragment extends BaseFragment{
             return;
         }
 
-        /**开启发送数据线程，每3秒发送一次数据*/
-//        SendThread.start();
-
         if (!bThread){
             ReadThread.start();
             bThread = true;
@@ -505,23 +499,6 @@ public class DeviceFragment extends BaseFragment{
         }
 
     }
-
-    /**发送数据的线程*/
-    private Thread SendThread = new Thread(){
-        @Override
-        public void run() {
-            super.run();
-            while (true){
-                sendMessage();
-                try {
-                    sleep(3000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-
-        }
-    };
 
     /**接收数据线程*/
     private Thread ReadThread = new Thread(){
