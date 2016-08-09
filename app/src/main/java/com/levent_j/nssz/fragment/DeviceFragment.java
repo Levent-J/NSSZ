@@ -70,6 +70,9 @@ public class DeviceFragment extends BaseFragment{
     private boolean isExist2 = false;
     private boolean isExist3 = false;
     private boolean isFirst = true;
+    private boolean isTimeRuning1 = false;
+    private boolean isTimeRuning2 = false;
+    private boolean isTimeRuning3 = false;
 
     /**报警检测，温服、湿度*/
     public static int TEMP_MAX = 100;
@@ -165,37 +168,37 @@ public class DeviceFragment extends BaseFragment{
         connectThread.start();
     }
 
-    private Handler fakeHandler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            loadFakeData();
-        }
-    };
-
-    private void loadFakeData() {
-
-        overTimeTask1.cancel();
-
-        loading.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
-        deviceList.clear();
-        for (int i=0;i<3;i++){
-            Device device = new Device();
-            device.setDeviceNumber(i+1);
-            device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
-            device.setTemperature((int) (25 + Math.random() * (30 - 25 + 1)));
-            device.setTemperatureDecimal((int) (0 + Math.random() * (10 - 0 + 1)));
-            device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
-            deviceList.add(device);
-        }
-        deviceAdapter.updateDeviceList(deviceList);
-
-        startOvertimeListener(1);
-        startOvertimeListener(2);
-        startOvertimeListener(3);
-
-    }
+//    private Handler fakeHandler = new Handler(){
+//        @Override
+//        public void handleMessage(Message msg) {
+//            super.handleMessage(msg);
+//            loadFakeData();
+//        }
+//    };
+//
+//    private void loadFakeData() {
+//
+//        overTimeTask1.cancel();
+//
+//        loading.setVisibility(View.GONE);
+//        recyclerView.setVisibility(View.VISIBLE);
+//        deviceList.clear();
+//        for (int i=0;i<3;i++){
+//            Device device = new Device();
+//            device.setDeviceNumber(i+1);
+//            device.setState((int) (2 + Math.random() * (4 - 2 + 1)));
+//            device.setTemperature((int) (25 + Math.random() * (30 - 25 + 1)));
+//            device.setTemperatureDecimal((int) (0 + Math.random() * (10 - 0 + 1)));
+//            device.setHumidity((int) (40 + Math.random() * (60 - 40 + 1)));
+//            deviceList.add(device);
+//        }
+//        deviceAdapter.updateDeviceList(deviceList);
+//
+//        startOvertimeListener(1);
+//        startOvertimeListener(2);
+//        startOvertimeListener(3);
+//
+//    }
 
     private void startOvertimeListener(int id) {
         if (id==1){
@@ -204,30 +207,36 @@ public class DeviceFragment extends BaseFragment{
                 @Override
                 public void run() {
                     overTimer1.cancel();
+                    isTimeRuning1 =false;
                     overTimeHandler1.sendMessage(overTimeHandler1.obtainMessage());
                 }
             };
             overTimer1.schedule(overTimeTask1,OVER_TIME_DELAY);
+            isTimeRuning1 = true;
         }else if (id==2){
             overTimer2 = new Timer();
             overTimeTask2 = new TimerTask() {
                 @Override
                 public void run() {
                     overTimer2.cancel();
+                    isTimeRuning2 = false;
                     overTimeHandler2.sendMessage(overTimeHandler2.obtainMessage());
                 }
             };
             overTimer2.schedule(overTimeTask2,OVER_TIME_DELAY);
+            isTimeRuning2 = true;
         }else {
             overTimer3 = new Timer();
             overTimeTask3 = new TimerTask() {
                 @Override
                 public void run() {
                     overTimer3.cancel();
+                    isTimeRuning3 = false;
                     overTimeHandler3.sendMessage(overTimeHandler3.obtainMessage());
                 }
             };
             overTimer3.schedule(overTimeTask3,OVER_TIME_DELAY);
+            isTimeRuning3 = true;
         }
     }
 
@@ -383,11 +392,17 @@ public class DeviceFragment extends BaseFragment{
         //根据标签卡号取消检测超时任务
         Log.e("DATA","cancel id:"+id);
         if (id==1){
-            overTimer1.cancel();
+            if (isTimeRuning1){
+                overTimer1.cancel();
+            }
         }else if (id==2){
-            overTimer2.cancel();
+            if (isTimeRuning2){
+                overTimer2.cancel();
+            }
         }else {
-            overTimer3.cancel();
+            if (isTimeRuning3){
+                overTimer3.cancel();
+            }
         }
         //进行下一次检测
         startOvertimeListener(id);
