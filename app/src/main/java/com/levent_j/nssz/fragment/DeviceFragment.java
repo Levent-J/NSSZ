@@ -4,6 +4,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -51,8 +53,8 @@ public class DeviceFragment extends BaseFragment{
     private List<Device> deviceList;
 
     /**报警检测*/
-    private Timer timer;
-    private TimerTask timerTask;
+    private Timer checkTimer;
+    private TimerTask checkTImeTask;
     private boolean isChecking = false;
 
     private Timer overTimer1;
@@ -257,7 +259,6 @@ public class DeviceFragment extends BaseFragment{
             if (isChecking&&isExist2){
                 showDialog("标签卡2异常!");
             }
-
         }
     };
 
@@ -268,7 +269,6 @@ public class DeviceFragment extends BaseFragment{
             if (isChecking&&isExist3){
                 showDialog("标签卡3异常!");
             }
-
         }
     };
 
@@ -296,15 +296,7 @@ public class DeviceFragment extends BaseFragment{
 
             if (mDeviceDetail[0]==2){
 
-                setExist(mDeviceDetail[4]);
-
-                if (isFirst){
-                    startOvertimeListener(mDeviceDetail[4]);
-                    isFirst = false;
-                }else {
-                    //根据标签卡号取消检测超时任务
-                    cancelTimerByNum(mDeviceDetail[4]);
-                }
+                initDataByNum(mDeviceDetail[4]);
 
                 //温度湿度
                 Device device = new Device();
@@ -322,15 +314,7 @@ public class DeviceFragment extends BaseFragment{
                 }
             }else if (mDeviceDetail[0]==3){
 
-                setExist(mDeviceDetail[1]);
-
-                if (isFirst){
-                    startOvertimeListener(mDeviceDetail[1]);
-                    isFirst = false;
-                }else {
-                    //根据标签卡号取消检测超时任务
-                    cancelTimerByNum(mDeviceDetail[1]);
-                }
+                initDataByNum(mDeviceDetail[1]);
 
                 if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
                     int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
@@ -346,15 +330,7 @@ public class DeviceFragment extends BaseFragment{
 
             }else {
 
-                setExist(mDeviceDetail[1]);
-
-                if (isFirst){
-                    startOvertimeListener(mDeviceDetail[1]);
-                    isFirst = false;
-                }else {
-                    //根据标签卡号取消检测超时任务
-                    cancelTimerByNum(mDeviceDetail[1]);
-                }
+                initDataByNum(mDeviceDetail[1]);
 
                 if (DeviceCheckUtil.isExist(mDeviceDetail[1],deviceList)){
                     int index = DeviceCheckUtil.getIndex(mDeviceDetail[1],deviceList);
@@ -377,6 +353,17 @@ public class DeviceFragment extends BaseFragment{
         }
     };
 
+    private void initDataByNum(int id){
+        setExist(id);
+        if (isFirst){
+            startOvertimeListener(id);
+            isFirst = false;
+        }else {
+            //根据标签卡号取消检测超时任务
+            cancelTimerByNum(id);
+        }
+    }
+
     private void setExist(int id){
         if (id==1){
             isExist1=true;
@@ -385,7 +372,6 @@ public class DeviceFragment extends BaseFragment{
         }else {
             isExist3=true;
         }
-
     }
 
     private void cancelTimerByNum(int id){
@@ -409,13 +395,11 @@ public class DeviceFragment extends BaseFragment{
     }
 
     private void initCheckTask(){
-        timer = new Timer();
-        timerTask = new TimerTask() {
+        checkTimer = new Timer();
+        checkTImeTask = new TimerTask() {
             @Override
             public void run() {
-                Message message = new Message();
-                message.what = 1;
-                checkHandler.sendMessage(message);
+                checkHandler.sendMessage(checkHandler.obtainMessage());
             }
         };
     }
@@ -435,17 +419,28 @@ public class DeviceFragment extends BaseFragment{
             //温度湿度检测另算
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)>= TEMP_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过高！");
+                closeCheck();
             }
             if (device.getHumidity()>= HUM_MAX){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过高！");
+                closeCheck();
             }
             if ((device.getTemperature()+device.getTemperatureDecimal()/10)<= TEMP_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"温度过低！");
+                closeCheck();
             }
             if (device.getHumidity()<= HUM_MIN){
                 showDialog("标签卡"+device.getDeviceNumber()+"湿度过低！");
+                closeCheck();
             }
         }
+    }
+
+    private void closeCheck(){
+        fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
+
+        checkTimer.cancel();
+        isChecking = false;
     }
 
     private void reventState(int id){
@@ -489,7 +484,6 @@ public class DeviceFragment extends BaseFragment{
                 mSocket = null;
             } catch (IOException e1) {
                 Log.e("Socket->close error",e.getMessage());
-                dialogHandler.sendMessage(dialogHandler.obtainMessage());
             }
             return;
         }
@@ -497,12 +491,11 @@ public class DeviceFragment extends BaseFragment{
         try {
             inputStream = mSocket.getInputStream();
         } catch (IOException e) {
-            dialogHandler.sendMessage(dialogHandler.obtainMessage());
             return;
         }
 
         /**开启发送数据线程，每3秒发送一次数据*/
-        SendThread.start();
+//        SendThread.start();
 
         if (!bThread){
             ReadThread.start();
@@ -566,8 +559,6 @@ public class DeviceFragment extends BaseFragment{
                     //判断缓存区是否已满
                     if (size>=9){
                         size=0;
-                        Log.e("DATA","0=<"+Integer.parseInt(String.valueOf(buffer_cache[0]))
-                                +">1=<"+Integer.parseInt(String.valueOf(buffer_cache[1]))+">");
                         if ((Integer.parseInt(String.valueOf(buffer_cache[0]))==13)
                                 &&(Integer.parseInt(String.valueOf(buffer_cache[1]))==10)
                                 &&(Integer.parseInt(String.valueOf(buffer_cache[7]))==10)
@@ -624,12 +615,11 @@ public class DeviceFragment extends BaseFragment{
                 .show();
     }
 
-    /**播放警报声*/
+    /**控制警报声*/
     public void startMusic(){
         mediaPlayer.seekTo(0);
         mediaPlayer.start();
     }
-
     public void stopMusic(){
         mediaPlayer.pause();
     }
@@ -642,16 +632,18 @@ public class DeviceFragment extends BaseFragment{
             Snackbar.make(view,"开启检测",Snackbar.LENGTH_SHORT).show();
 
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
+            fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#F44336")));
 
             initCheckTask();
-            timer.scheduleAtFixedRate(timerTask, 1000, 2000);
+            checkTimer.scheduleAtFixedRate(checkTImeTask, 1000, 2000);
             isChecking = true;
         }else {
             Snackbar.make(view,"关闭检测",Snackbar.LENGTH_SHORT).show();
 
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
+            fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#7393e2")));
 
-            timer.cancel();
+            checkTimer.cancel();
             isChecking = false;
         }
     }
@@ -662,11 +654,17 @@ public class DeviceFragment extends BaseFragment{
         loadDateHandler.removeCallbacksAndMessages(null);
         checkHandler.removeCallbacksAndMessages(null);
         dialogHandler.removeCallbacksAndMessages(null);
+        overTimeHandler1.removeCallbacksAndMessages(null);
+        overTimeHandler2.removeCallbacksAndMessages(null);
+        overTimeHandler3.removeCallbacksAndMessages(null);
 
-        try {
-            mSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (mSocket!=null){
+            try {
+                mSocket.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
+
     }
 }
