@@ -7,11 +7,11 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
         <TextView
+            android:textColor="#212121"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="新设备"
-            android:textStyle="bold"
             android:textSize="18sp"/>
         <ListView
             android:layout_width="match_parent"
@@ -19,11 +19,11 @@
             android:id="@+id/lv_new_list"
             android:layout_weight="1"></ListView>
         <TextView
+            android:textColor="#212121"
             android:gravity="center"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="已配对设备"
-            android:textStyle="bold"
             android:textSize="18sp"/>
         <ListView
             android:layout_width="match_parent"

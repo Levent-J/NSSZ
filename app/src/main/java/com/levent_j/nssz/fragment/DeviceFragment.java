@@ -642,6 +642,7 @@ public class DeviceFragment extends BaseFragment{
             Snackbar.make(view,"开启检测",Snackbar.LENGTH_SHORT).show();
 
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_stop));
+
             initCheckTask();
             timer.scheduleAtFixedRate(timerTask, 1000, 2000);
             isChecking = true;
@@ -649,6 +650,7 @@ public class DeviceFragment extends BaseFragment{
             Snackbar.make(view,"关闭检测",Snackbar.LENGTH_SHORT).show();
 
             fab.setImageDrawable(getResources().getDrawable(R.drawable.ic_check));
+
             timer.cancel();
             isChecking = false;
         }

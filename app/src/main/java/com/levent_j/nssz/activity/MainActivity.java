@@ -43,7 +43,7 @@ public class MainActivity extends BaseActivity
         fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction().replace(R.id.fl_container, DeviceFragment.newInstance()).commit();
         current = R.id.nav_main;
-        setTitle("资产列表");
+        setTitle("设备列表");
         navigationView.setCheckedItem(R.id.nav_main);
 
         setSupportActionBar(toolbar);
